@@ -1,0 +1,67 @@
+#! /usr/bin/env python
+import argparse
+
+import oneliner.scanner
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('code', metavar='code', type=str, nargs='*',
+                        help='code to run')
+    parser.add_argument('-f', '--file', type=str)
+
+    args = parser.parse_args()
+
+    # AWK風に -f があればそれをスクリプトとして、
+    # なければコマンドラインの一つ目をスクリプトとして解釈する。
+
+    runner = Runner()
+    if args.file:
+        runner.run_file(args.file, args.code)
+    elif len(args.code) == 0:
+        runner.run_prompt()
+    else:
+        runner.run(args.code[0], args.code[1:])
+
+
+class Runner:
+    has_error = False
+
+    def run_file(self, script_path: str, args: list[str]):
+        with open(script_path, 'r', encoding='utf-8') as file:
+            code = file.read()
+            self.run(code, args)
+            if self.has_error:
+                exit(65)
+
+    def run_prompt(self):
+        while True:
+            try:
+                # 入力を読み込む
+                code = input("> ")
+                # 入力を評価して結果を表示
+                print(self.run(code))
+                self.has_error = False
+            except KeyboardInterrupt:
+                print("\nKeyboardInterrupt")
+            except EOFError:
+                print("\nexit")
+                break
+            except Exception as e:
+                print(f"エラー: {e}")
+
+    def run(self, code: str, args: list[str]):
+        scanner = oneliner.scanner.Scanner()
+        tokens = scanner.scan_tokens(code)
+        print(tokens)
+
+    def error(self, line: int, message: str):
+        self.report(line, "", message)
+
+    def report(self, line: int, where: str, message: str):
+        print(f"Error on line {line} {where}: {message}")
+        self.has_error = True
+
+
+if __name__ == "__main__":
+    main()
