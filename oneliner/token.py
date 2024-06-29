@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Union, Any
+from typing import Union
 
 
 class TokenType(Enum):
@@ -71,3 +71,5 @@ class Token:
 
     def __str__(self):
         return f"{self.type} {self.lexeme} {self.literal}"
+
+    __repr__ = __str__

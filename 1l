@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import argparse
 
-import oneliner.scanner
+from oneliner.scanner import Scanner, ScanException
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
 class Runner:
     has_error = False
 
-    def run_file(self, script_path: str, args: list[str]):
+    def run_file(self, script_path: str, args: list[str] = []):
         with open(script_path, 'r', encoding='utf-8') as file:
             code = file.read()
             self.run(code, args)
@@ -50,9 +50,15 @@ class Runner:
             except Exception as e:
                 print(f"エラー: {e}")
 
-    def run(self, code: str, args: list[str]):
-        scanner = oneliner.scanner.Scanner()
-        tokens = scanner.scan_tokens(code)
+    def run(self, code: str, args: list[str] = []):
+        scanner = Scanner(code)
+
+        try:
+            tokens = scanner.scan_tokens()
+        except ScanException as e:
+            self.report(e.line, e.current, e.message)
+            return
+
         print(tokens)
 
     def error(self, line: int, message: str):
