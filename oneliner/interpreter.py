@@ -1,13 +1,13 @@
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
     BinaryExpr, TernaryExpr, VariableExpr, AssignExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, BlockStmt
 from oneliner.error import InterpretError, ErrorReporter
 from oneliner.environment import Environment
 
 
 class Interpreter:
-    # ExprVisitor
+    # ExprVisitor, StmtVisitor
 
     def __init__(self, error_reporter: ErrorReporter):
         self.environment = Environment()
@@ -42,6 +42,18 @@ class Interpreter:
             value = self.evaluate(stmt.initializer)
 
         self.environment.define(stmt.name.lexeme, value)
+
+    def visit_block_stmt(self, stmt: BlockStmt) -> None:
+        self.execute_block(stmt.statements, Environment(self.environment))
+
+    def execute_block(self, statements: list[Stmt], environment: Environment):
+        previous: Environment = self.environment
+        try:
+            self.environment = environment
+            for statement in statements:
+                self.execute(statement)
+        finally:
+            self.environment = previous
 
     def visit_assign_expr(self, expr: AssignExpr):
         value = self.evaluate(expr.value)

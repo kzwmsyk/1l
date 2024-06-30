@@ -14,6 +14,7 @@ keywords = {
     "nil": TokenType.NIL,
     "or": TokenType.OR,
     "p": TokenType.PRINT,
+    "print": TokenType.PRINT,
     "return": TokenType.RETURN,
     "super": TokenType.SUPER,
     "this": TokenType.THIS,

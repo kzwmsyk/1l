@@ -1,7 +1,7 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
     GroupingExpr, TernaryExpr, VariableExpr, AssignExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, BlockStmt
 from oneliner.error import ParseError, ErrorReporter
 
 
@@ -21,6 +21,10 @@ class Parser:
         except ParseError:
             return None
 
+    #
+    # statements
+    #
+
     def declaration(self) -> Stmt:
         try:
             if self.match(TokenType.VAR):
@@ -31,9 +35,11 @@ class Parser:
             return None
 
     def var_declaration(self):
+
         name: Token = self.consume(
             TokenType.IDENTIFIER, "Expect variable name.")
         initializer: Expr = None
+
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
 
@@ -47,6 +53,10 @@ class Parser:
     def statement(self) -> Stmt:
         if self.match(TokenType.PRINT):
             return self.print_statement()
+
+        if self.match(TokenType.LEFT_BRACE):
+            return BlockStmt(self.block())
+
         # TODO: ほかのぶん
         return self.expression_statement()
 
@@ -59,6 +69,17 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return ExpressionStmt(expr)
+
+    def block(self) -> list[Stmt]:
+        statements: list[Stmt] = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+
+    #
+    # expressions
+    #
 
     def expression(self) -> Expr:
         return self.assignment()
