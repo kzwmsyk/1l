@@ -13,10 +13,6 @@ class {{base_name}}:
 
 
 class {{subclass_name}}{{base_name}}({{base_name}}):
-    {{#fields}}
-    {{name}}: {{type}}
-    {{/fields}}
-
     def __init__(self,{{#fields}}
                  {{name}}: {{type}}{{^is_last}},{{/is_last}}{{/fields}}):
 

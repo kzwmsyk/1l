@@ -26,11 +26,13 @@ def main(args):
                    "Get": [("object", "Expr"), ("name", "Token")],
                    "Grouping": [("expression", "Expr")],
                    "Literal": [("value", "object")],
-                   "Logical": [("left", "Expr"), ("operator", "Token"), ("right", "Expr")],
-                   "Set": [("object", "Expr"), ("name", "Token"), ("value", "Expr")],
+                   "Logical": [("left", "Expr"), ("operator", "Token"),
+                               ("right", "Expr")],
+                   "Set": [("object", "Expr"), ("name", "Token"),
+                           ("value", "Expr")],
                    "Super": [("keyword", "Token"), ("method", "Token")],
                    "This": [("keyword", "Token")],
-                   "Unary": [("operator", "Token"), ("right", "Expr")],
+                   "Unary": [("operator", "Token"), ("operand", "Expr")],
                    "Variable": [("name", "Token")],
                })
 

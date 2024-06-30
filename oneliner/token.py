@@ -57,11 +57,6 @@ class TokenType(Enum):
 
 
 class Token:
-    type: TokenType
-    lexeme: str
-    literal: Union[int, float, str]
-    line: int
-
     def __init__(self, type: TokenType,
                  lexeme: str,
                  literal: Union[int, float, str],

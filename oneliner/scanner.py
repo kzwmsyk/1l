@@ -23,20 +23,18 @@ keywords = {
 
 
 class Scanner:
-    source: str
-    tokens: list[Token] = list()
-    start: int = 0
-    current: int = 0
-    line: int = 1
 
     def __init__(self, source: str):
+        self.tokens = []
         self.source = source
+        self.start: int = 0
+        self.current: int = 0
+        self.line: int = 1
 
     def scan_tokens(self):
         while not self.is_at_end():
             self.start = self.current
             self.scan_token()
-
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
         return self.tokens
 

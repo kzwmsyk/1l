@@ -12,9 +12,6 @@ class Expr:
 
 
 class AssignExpr(Expr):
-    name: Token
-    value: Expr
-
     def __init__(self,
                  name: Token,
                  value: Expr):
@@ -27,10 +24,6 @@ class AssignExpr(Expr):
 
 
 class BinaryExpr(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
-
     def __init__(self,
                  left: Expr,
                  operator: Token,
@@ -45,10 +38,6 @@ class BinaryExpr(Expr):
 
 
 class CallExpr(Expr):
-    callee: Expr
-    paren: Token
-    arguments: list[Expr]
-
     def __init__(self,
                  callee: Expr,
                  paren: Token,
@@ -63,9 +52,6 @@ class CallExpr(Expr):
 
 
 class GetExpr(Expr):
-    object: Expr
-    name: Token
-
     def __init__(self,
                  object: Expr,
                  name: Token):
@@ -78,8 +64,6 @@ class GetExpr(Expr):
 
 
 class GroupingExpr(Expr):
-    expression: Expr
-
     def __init__(self,
                  expression: Expr):
 
@@ -90,8 +74,6 @@ class GroupingExpr(Expr):
 
 
 class LiteralExpr(Expr):
-    value: object
-
     def __init__(self,
                  value: object):
 
@@ -102,10 +84,6 @@ class LiteralExpr(Expr):
 
 
 class LogicalExpr(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
-
     def __init__(self,
                  left: Expr,
                  operator: Token,
@@ -120,10 +98,6 @@ class LogicalExpr(Expr):
 
 
 class SetExpr(Expr):
-    object: Expr
-    name: Token
-    value: Expr
-
     def __init__(self,
                  object: Expr,
                  name: Token,
@@ -138,9 +112,6 @@ class SetExpr(Expr):
 
 
 class SuperExpr(Expr):
-    keyword: Token
-    method: Token
-
     def __init__(self,
                  keyword: Token,
                  method: Token):
@@ -153,8 +124,6 @@ class SuperExpr(Expr):
 
 
 class ThisExpr(Expr):
-    keyword: Token
-
     def __init__(self,
                  keyword: Token):
 
@@ -165,23 +134,18 @@ class ThisExpr(Expr):
 
 
 class UnaryExpr(Expr):
-    operator: Token
-    right: Expr
-
     def __init__(self,
                  operator: Token,
-                 right: Expr):
+                 operand: Expr):
 
         self.operator = operator
-        self.right = right
+        self.operand = operand
 
     def accept(self, visitor):
         return visitor.visit_unary_expr(self)
 
 
 class VariableExpr(Expr):
-    name: Token
-
     def __init__(self,
                  name: Token):
 

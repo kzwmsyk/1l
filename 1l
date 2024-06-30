@@ -2,6 +2,9 @@
 import argparse
 
 from oneliner.scanner import Scanner, ScanException
+from oneliner.parser import Parser
+from oneliner.ast_printer import AstPrinter
+from oneliner.interpreter import Interpreter
 
 
 def main():
@@ -26,6 +29,10 @@ def main():
 
 class Runner:
     has_error = False
+    interpreter: Interpreter = Interpreter()
+
+    def __init__(self):
+        self.interpreter = Interpreter()
 
     def run_file(self, script_path: str, args: list[str] = []):
         with open(script_path, 'r', encoding='utf-8') as file:
@@ -40,7 +47,7 @@ class Runner:
                 # 入力を読み込む
                 code = input("> ")
                 # 入力を評価して結果を表示
-                print(self.run(code))
+                self.run(code)
                 self.has_error = False
             except KeyboardInterrupt:
                 print("\nKeyboardInterrupt")
@@ -52,14 +59,22 @@ class Runner:
 
     def run(self, code: str, args: list[str] = []):
         scanner = Scanner(code)
-
         try:
             tokens = scanner.scan_tokens()
+            parser = Parser(tokens)
+            expr = parser.parse()
+
+            if (self.has_error):
+                return
+
+            # printer = AstPrinter()
+            # print(printer.print(expr))
+
+            self.interpreter.interpret(expr)
+
         except ScanException as e:
             self.report(e.line, e.current, e.message)
             return
-
-        print(tokens)
 
     def error(self, line: int, message: str):
         self.report(line, "", message)

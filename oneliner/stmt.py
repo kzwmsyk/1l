@@ -14,8 +14,6 @@ class Stmt:
 
 
 class BlockStmt(Stmt):
-    statements: list[Stmt]
-
     def __init__(self,
                  statements: list[Stmt]):
 
@@ -26,8 +24,6 @@ class BlockStmt(Stmt):
 
 
 class ExpressionStmt(Stmt):
-    expression: Expr
-
     def __init__(self,
                  expression: Expr):
 
@@ -38,10 +34,6 @@ class ExpressionStmt(Stmt):
 
 
 class FunctionStmt(Stmt):
-    name: Token
-    params: list[Token]
-    body: list[Stmt]
-
     def __init__(self,
                  name: Token,
                  params: list[Token],
@@ -56,10 +48,6 @@ class FunctionStmt(Stmt):
 
 
 class ClassStmt(Stmt):
-    name: Token
-    superclass: VariableExpr
-    methods: list[FunctionStmt]
-
     def __init__(self,
                  name: Token,
                  superclass: VariableExpr,
@@ -74,10 +62,6 @@ class ClassStmt(Stmt):
 
 
 class IfStmt(Stmt):
-    condition: Expr
-    then_branch: Stmt
-    else_branch: Stmt
-
     def __init__(self,
                  condition: Expr,
                  then_branch: Stmt,
@@ -92,8 +76,6 @@ class IfStmt(Stmt):
 
 
 class PrintStmt(Stmt):
-    expression: Expr
-
     def __init__(self,
                  expression: Expr):
 
@@ -104,9 +86,6 @@ class PrintStmt(Stmt):
 
 
 class ReturnStmt(Stmt):
-    keyword: Token
-    value: Expr
-
     def __init__(self,
                  keyword: Token,
                  value: Expr):
@@ -119,9 +98,6 @@ class ReturnStmt(Stmt):
 
 
 class VarStmt(Stmt):
-    name: Token
-    initializer: Expr
-
     def __init__(self,
                  name: Token,
                  initializer: Expr):
@@ -134,9 +110,6 @@ class VarStmt(Stmt):
 
 
 class WhileStmt(Stmt):
-    condition: Expr
-    body: Stmt
-
     def __init__(self,
                  condition: Expr,
                  body: Stmt):
