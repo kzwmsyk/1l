@@ -2,7 +2,7 @@ from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
     GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt
+    BlockStmt, IfStmt, WhileStmt
 from oneliner.error import ParseError, ErrorReporter
 
 
@@ -60,6 +60,9 @@ class Parser:
 
         if self.match(TokenType.IF):
             return self.if_statement()
+
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
         # TODO: ほかのぶん
         return self.expression_statement()
 
@@ -92,6 +95,14 @@ class Parser:
         if self.match(TokenType.ELSE):
             else_branch = self.statement()
         return IfStmt(condition, then_branch, else_branch)
+
+    def while_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        body = self.statement()
+        return WhileStmt(condition, body)
 
     #
     # expressions

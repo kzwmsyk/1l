@@ -2,7 +2,7 @@ from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
     BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt
+    BlockStmt, IfStmt, WhileStmt
 from oneliner.error import InterpretError, ErrorReporter
 from oneliner.environment import Environment
 
@@ -61,6 +61,10 @@ class Interpreter:
             self.execute(stmt.then_branch)
         elif stmt.else_branch is not None:
             self.execute(stmt.else_branch)
+
+    def visit_while_stmt(self, stmt: WhileStmt) -> None:
+        while self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
 
     def visit_assign_expr(self, expr: AssignExpr):
         value = self.evaluate(expr.value)
