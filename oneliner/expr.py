@@ -123,6 +123,20 @@ class SuperExpr(Expr):
         return visitor.visit_super_expr(self)
 
 
+class TernaryExpr(Expr):
+    def __init__(self,
+                 condition: Expr,
+                 then_expr: Expr,
+                 else_expr: Expr):
+
+        self.condition = condition
+        self.then_expr = then_expr
+        self.else_expr = else_expr
+
+    def accept(self, visitor):
+        return visitor.visit_ternary_expr(self)
+
+
 class ThisExpr(Expr):
     def __init__(self,
                  keyword: Token):

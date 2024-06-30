@@ -1,6 +1,6 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr
+    GroupingExpr, TernaryExpr
 
 
 class ParseError(Exception):
@@ -15,11 +15,20 @@ class Parser:
 
     def parse(self):
         try:
-            return self.expression()
+            return self.ternary()
         except ParseError:
             return None
 
-    def expression(self) -> Expr:
+    def ternary(self) -> Expr:
+        expr = self.equality()
+        if self.match(TokenType.QUESTION):
+            then_expr = self.ternary()
+            self.consume(TokenType.COLON, "Expect ':' after '?' expr ")
+            else_expr = self.ternary()
+            return TernaryExpr(expr, then_expr, else_expr)
+        return expr
+
+    def equality(self) -> Expr:
         expr = self.comparison()
         while (self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)):
             operator = self.previous()
@@ -98,7 +107,7 @@ class Parser:
             return LiteralExpr(self.previous().literal)
 
         if self.match(TokenType.LEFT_PAREN):
-            expr = self.expression()
+            expr = self.ternary()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return GroupingExpr(expr)
 

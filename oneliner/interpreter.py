@@ -1,5 +1,5 @@
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
-    BinaryExpr
+    BinaryExpr, TernaryExpr
 from oneliner.token import TokenType, Token
 
 
@@ -20,7 +20,7 @@ class Interpreter:
             value = self.evaluate(expr)
             print(self.stringify(value))
         except RuntimeError as e:
-            self.runtime_error(e)
+            print(e)
 
     def stringify(self, value):
         if value is None:
@@ -56,6 +56,13 @@ class Interpreter:
 
     def is_numeric(self, object):
         return isinstance(object, float) or isinstance(object, int)
+
+    def visit_ternary_expr(self, expr: TernaryExpr):
+        condition = self.evaluate(expr.condition)
+        if self.is_truthy(condition):
+            return self.evaluate(expr.then_expr)
+        else:
+            return self.evaluate(expr.else_expr)
 
     def visit_binary_expr(self, expr: BinaryExpr):
         left = self.evaluate(expr.left)

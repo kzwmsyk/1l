@@ -1,6 +1,6 @@
 
 from oneliner.expr import Expr, LiteralExpr, UnaryExpr, BinaryExpr, \
-    GroupingExpr
+    GroupingExpr, TernaryExpr
 
 
 class AstPrinter:
@@ -19,6 +19,12 @@ class AstPrinter:
 
     def visit_unary_expr(self, expr: UnaryExpr):
         return self.parenthesize(expr.operator.lexeme, expr.right)
+
+    def visit_ternary_expr(self, expr: TernaryExpr):
+        return self.parenthesize("ternary",
+                                 expr.condition,
+                                 expr.then_expr,
+                                 expr.else_expr)
 
     def parenthesize(self, name, *args: list[Expr]):
         text = f"({name}"

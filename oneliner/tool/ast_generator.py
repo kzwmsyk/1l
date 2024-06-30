@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import sys
 from pathlib import Path
 import chevron
@@ -32,6 +33,9 @@ def main(args):
                    "Set": [("object", "Expr"), ("name", "Token"),
                            ("value", "Expr")],
                    "Super": [("keyword", "Token"), ("method", "Token")],
+                   "Ternary": [("condition", "Expr"),
+                               ("then_expr", "Expr"),
+                               ("else_expr", "Expr")],
                    "This": [("keyword", "Token")],
                    "Unary": [("operator", "Token"), ("operand", "Expr")],
                    "Variable": [("name", "Token")],
