@@ -1,7 +1,7 @@
 import re
 from oneliner.token import Token, TokenType
 from typing import Union
-from oneliner.error import ScanError, ErrorReporter
+from oneliner.error import ErrorReporter
 
 keywords = {
     "and": TokenType.AND,

@@ -1,5 +1,3 @@
-import argparse
-
 from oneliner.scanner import Scanner
 from oneliner.error import ScanError, ErrorReporter
 from oneliner.parser import Parser
