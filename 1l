@@ -64,16 +64,16 @@ class Runner:
         try:
             tokens = scanner.scan_tokens()
             parser = Parser(tokens)
-            expr = parser.parse()
+            statements = parser.parse()
 
             if (self.has_error):
                 return
 
             if self.is_debug:
                 printer = AstPrinter()
-                print(printer.print(expr))
+                print(printer.print(statements))
 
-            self.interpreter.interpret(expr)
+            self.interpreter.interpret(statements)
 
         except ScanException as e:
             self.report(e.line, e.current, e.message)

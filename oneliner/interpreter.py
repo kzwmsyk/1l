@@ -1,6 +1,7 @@
+from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
     BinaryExpr, TernaryExpr
-from oneliner.token import TokenType, Token
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt
 
 
 class RuntimeError(Exception):
@@ -15,18 +16,28 @@ class RuntimeError(Exception):
 class Interpreter:
     # ExprVisitor
 
-    def interpret(self, expr: Expr):
+    def interpret(self, statements: list[Stmt]):
         try:
-            value = self.evaluate(expr)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except RuntimeError as e:
             print(e)
+
+    def execute(self, stmt: Stmt):
+        stmt.accept(self)
 
     def stringify(self, value):
         if value is None:
             return "nil"
         else:
             return str(value)
+
+    def visit_print_stmt(self, stmt: PrintStmt) -> None:
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
+
+    def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
+        self.evaluate(stmt.expression)
 
     def visit_literal_expr(self, expr: LiteralExpr):
         return expr.value

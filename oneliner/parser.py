@@ -1,6 +1,7 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr, TernaryExpr
+    GroupingExpr, TernaryExpr, VariableExpr
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt
 
 
 class ParseError(Exception):
@@ -13,18 +14,63 @@ class Parser:
         self.current: int = 0
         self.tokens = tokens
 
-    def parse(self):
+    def parse(self) -> list[Stmt]:
         try:
-            return self.ternary()
+            statements: list[Stmt] = []
+            while not self.is_at_end():
+                statements.append(self.declaration())
+            return statements
         except ParseError:
             return None
+
+    def declaration(self) -> Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration()
+            return self.statement()
+        except ParseError:
+            self.synchronize()
+            return None
+
+    def var_declaration(self):
+        name: Token = self.consume(
+            TokenType.IDENTIFIER, "Expect variable name.")
+        initializer: Expr = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON,
+                     "Expect ';' after variable declaration.")
+        return VarStmt(name, initializer)
+
+    def function(self, kind: str) -> Stmt:
+        pass
+
+    def statement(self) -> Stmt:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        # TODO: ほかのぶん
+        return self.expression_statement()
+
+    def print_statement(self) -> Stmt:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return PrintStmt(expr)
+
+    def expression_statement(self) -> Stmt:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return ExpressionStmt(expr)
+
+    def expression(self) -> Expr:
+        return self.ternary()
 
     def ternary(self) -> Expr:
         expr = self.equality()
         if self.match(TokenType.QUESTION):
-            then_expr = self.ternary()
+            then_expr = self.expression()
             self.consume(TokenType.COLON, "Expect ':' after '?' expr ")
-            else_expr = self.ternary()
+            else_expr = self.expression()
             return TernaryExpr(expr, then_expr, else_expr)
         return expr
 
@@ -106,8 +152,11 @@ class Parser:
         if self.match(TokenType.INT, TokenType.FLOAT, TokenType.STRING):
             return LiteralExpr(self.previous().literal)
 
+        if self.match(TokenType.IDENTIFIER):
+            return VariableExpr(self.previous())
+
         if self.match(TokenType.LEFT_PAREN):
-            expr = self.ternary()
+            expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return GroupingExpr(expr)
 

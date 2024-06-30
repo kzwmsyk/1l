@@ -1,12 +1,23 @@
 
 from oneliner.expr import Expr, LiteralExpr, UnaryExpr, BinaryExpr, \
     GroupingExpr, TernaryExpr
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt
 
 
 class AstPrinter:
 
-    def print(self, expr):
-        return expr.accept(self)
+    def print(self, expr_or_stmt):
+        return expr_or_stmt.accept(self)
+
+    def print_statements(self, statements: list[Stmt]):
+        for statement in statements:
+            print(self.print(statement))
+
+    def visit_print_stmt(self, stmt: PrintStmt):
+        return self.parenthesize("print", stmt.expression)
+
+    def visit_expression_stmt(self, stmt: ExpressionStmt):
+        return self.print(";", stmt.expression)
 
     def visit_binary_expr(self, expr: BinaryExpr):
         return self.parenthesize("binary", expr.left, expr.right)
