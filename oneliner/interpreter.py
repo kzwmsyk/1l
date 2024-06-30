@@ -1,7 +1,8 @@
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
-    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, BlockStmt
+    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
+    BlockStmt, IfStmt
 from oneliner.error import InterpretError, ErrorReporter
 from oneliner.environment import Environment
 
@@ -55,6 +56,12 @@ class Interpreter:
         finally:
             self.environment = previous
 
+    def visit_if_stmt(self, stmt: IfStmt) -> None:
+        if self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.then_branch)
+        elif stmt.else_branch is not None:
+            self.execute(stmt.else_branch)
+
     def visit_assign_expr(self, expr: AssignExpr):
         value = self.evaluate(expr.value)
         self.environment.assign(expr.name, value)
@@ -95,6 +102,18 @@ class Interpreter:
             return self.evaluate(expr.then_expr)
         else:
             return self.evaluate(expr.else_expr)
+
+    def visit_logical_expr(self, expr: LogicalExpr):
+        left = self.evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(expr.right)
 
     def visit_binary_expr(self, expr: BinaryExpr):
         left = self.evaluate(expr.left)

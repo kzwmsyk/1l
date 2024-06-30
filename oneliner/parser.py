@@ -1,7 +1,8 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, BlockStmt
+    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
+    BlockStmt, IfStmt
 from oneliner.error import ParseError, ErrorReporter
 
 
@@ -55,8 +56,10 @@ class Parser:
             return self.print_statement()
 
         if self.match(TokenType.LEFT_BRACE):
-            return BlockStmt(self.block())
+            return BlockStmt(self.block_statement())
 
+        if self.match(TokenType.IF):
+            return self.if_statement()
         # TODO: ほかのぶん
         return self.expression_statement()
 
@@ -70,12 +73,25 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return ExpressionStmt(expr)
 
-    def block(self) -> list[Stmt]:
+    def block_statement(self) -> list[Stmt]:
         statements: list[Stmt] = []
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
             statements.append(self.declaration())
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
+
+    def if_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self.statement()
+        else_branch = None
+
+        # elseは最も近いifとくっつく
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+        return IfStmt(condition, then_branch, else_branch)
 
     #
     # expressions
@@ -98,12 +114,28 @@ class Parser:
         return expr
 
     def ternary(self) -> Expr:
-        expr = self.equality()
+        expr = self.logical_or()
         if self.match(TokenType.QUESTION):
             then_expr = self.expression()
             self.consume(TokenType.COLON, "Expect ':' after '?' expr ")
-            else_expr = self.expression()
+            else_expr = self.ternary()
             return TernaryExpr(expr, then_expr, else_expr)
+        return expr
+
+    def logical_or(self) -> Expr:
+        expr = self.logical_and()
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.logical_and()
+            expr = LogicalExpr(expr, operator, right)
+        return expr
+
+    def logical_and(self) -> Expr:
+        expr = self.equality()
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = LogicalExpr(expr, operator, right)
         return expr
 
     def equality(self) -> Expr:
