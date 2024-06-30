@@ -1,4 +1,5 @@
-from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, BinaryExpr
+from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
+    BinaryExpr
 from oneliner.token import TokenType, Token
 
 
@@ -30,7 +31,7 @@ class Interpreter:
     def visit_literal_expr(self, expr: LiteralExpr):
         return expr.value
 
-    def visit_grouping_expr(self, expr):
+    def visit_grouping_expr(self, expr: GroupingExpr):
         return self.evaluate(expr.expression)
 
     def visit_unary_expr(self, expr: UnaryExpr):

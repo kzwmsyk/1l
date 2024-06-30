@@ -12,13 +12,14 @@ def main():
     parser.add_argument('code', metavar='code', type=str, nargs='*',
                         help='code to run')
     parser.add_argument('-f', '--file', type=str)
+    parser.add_argument('-d', '--debug', action='store_true')
 
     args = parser.parse_args()
 
     # AWK風に -f があればそれをスクリプトとして、
     # なければコマンドラインの一つ目をスクリプトとして解釈する。
 
-    runner = Runner()
+    runner = Runner(args)
     if args.file:
         runner.run_file(args.file, args.code)
     elif len(args.code) == 0:
@@ -31,8 +32,9 @@ class Runner:
     has_error = False
     interpreter: Interpreter = Interpreter()
 
-    def __init__(self):
+    def __init__(self, args):
         self.interpreter = Interpreter()
+        self.is_debug = args.debug
 
     def run_file(self, script_path: str, args: list[str] = []):
         with open(script_path, 'r', encoding='utf-8') as file:
@@ -67,8 +69,9 @@ class Runner:
             if (self.has_error):
                 return
 
-            # printer = AstPrinter()
-            # print(printer.print(expr))
+            if self.is_debug:
+                printer = AstPrinter()
+                print(printer.print(expr))
 
             self.interpreter.interpret(expr)
 

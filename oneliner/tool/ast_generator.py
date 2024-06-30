@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 import chevron
@@ -17,7 +16,9 @@ def main(args):
                """,
                {
                    "Assign": [("name", "Token"), ("value", "Expr")],
-                   "Binary": [("left", "Expr"), ("operator", "Token"), ("right", "Expr")],
+                   "Binary": [("left", "Expr"),
+                              ("operator", "Token"),
+                              ("right", "Expr")],
                    "Call": [
                        ("callee", "Expr"),
                        ("paren", "Token"),
