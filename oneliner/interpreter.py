@@ -1,27 +1,24 @@
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
-    BinaryExpr, TernaryExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt
-
-
-class RuntimeError(Exception):
-    token: Token
-    message: str
-
-    def __init__(self, token: Token, message: str):
-        self.token = token
-        self.message = message
+    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr
+from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt
+from oneliner.error import InterpretError, ErrorReporter
+from oneliner.environment import Environment
 
 
 class Interpreter:
     # ExprVisitor
 
+    def __init__(self, error_reporter: ErrorReporter):
+        self.environment = Environment()
+        self.error_reporter = error_reporter
+
     def interpret(self, statements: list[Stmt]):
         try:
             for statement in statements:
                 self.execute(statement)
-        except RuntimeError as e:
-            print(e)
+        except InterpretError as e:
+            self.error_reporter.runtime_error(e)
 
     def execute(self, stmt: Stmt):
         stmt.accept(self)
@@ -39,6 +36,18 @@ class Interpreter:
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
         self.evaluate(stmt.expression)
 
+    def visit_var_stmt(self, stmt: VarStmt) -> None:
+        value = None
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+
+        self.environment.define(stmt.name.lexeme, value)
+
+    def visit_assign_expr(self, expr: AssignExpr):
+        value = self.evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value
+
     def visit_literal_expr(self, expr: LiteralExpr):
         return expr.value
 
@@ -55,15 +64,15 @@ class Interpreter:
             case TokenType.NOT:
                 return not self.is_truthy(operand)
             case _:
-                raise RuntimeError(expr.operator, "Unreachable")
+                raise InterpretError(expr.operator, "Unreachable")
 
     def check_numeric_operand(self, operator: Token, operand):
         if not self.is_numeric(operand):
-            raise RuntimeError(operator, "Operand must be number")
+            raise InterpretError(operator, "Operand must be number")
 
     def check_numeric_operands(self, operator: Token, left, right):
         if not (self.is_numeric(left) and self.is_numeric(right)):
-            raise RuntimeError(operator, "Operands must be numbers")
+            raise InterpretError(operator, "Operands must be numbers")
 
     def is_numeric(self, object):
         return isinstance(object, float) or isinstance(object, int)
@@ -86,7 +95,7 @@ class Interpreter:
                 elif isinstance(left, str) and isinstance(right, str):
                     return left + right
                 else:
-                    raise RuntimeError(
+                    raise InterpretError(
                         expr.operator,
                         "Operands must be two numbers or two strings"
                     )
@@ -116,7 +125,7 @@ class Interpreter:
             case TokenType.BANG_EQUAL:
                 return not self.is_equal(left, right)
             case _:
-                raise RuntimeError(expr.operator, "Unreachable")
+                raise InterpretError(expr.operator, "Unreachable")
 
     def is_equal(self, left, right):
         if left is None and right is None:
@@ -134,3 +143,6 @@ class Interpreter:
         if isinstance(object, bool):
             return object
         return True
+
+    def visit_variable_expr(self, expr: VariableExpr):
+        return self.environment.get(expr.name)

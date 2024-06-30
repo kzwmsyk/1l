@@ -1,6 +1,7 @@
 import re
 from oneliner.token import Token, TokenType
 from typing import Union
+from oneliner.error import ScanError, ErrorReporter
 
 keywords = {
     "and": TokenType.AND,
@@ -24,12 +25,13 @@ keywords = {
 
 class Scanner:
 
-    def __init__(self, source: str):
+    def __init__(self, source: str, error_reporter: ErrorReporter):
         self.tokens = []
         self.source = source
         self.start: int = 0
         self.current: int = 0
         self.line: int = 1
+        self.error_reporter = error_reporter
 
     def scan_tokens(self):
         while not self.is_at_end():
@@ -102,8 +104,9 @@ class Scanner:
                 elif self.is_alpha(char):
                     self.identifier()
                 else:
-                    raise ScanException(char, "Unknown character",
-                                        self.line, self.current)
+                    self.error_reporter.error(
+                        self.line, f"Unknown character: {char}"
+                    )
 
     def is_at_end(self):
         return self.current >= len(self.source)
@@ -144,7 +147,8 @@ class Scanner:
             self.advance()
 
         if self.is_at_end():
-            raise ScanException("Unterminated string", self.line, self.current)
+            self.error_reporter.error(self.line, "Unterminated string")
+            return
 
         self.advance()  # 閉じる引用符を消費
         self.add_token(TokenType.STRING,
@@ -189,18 +193,3 @@ class Scanner:
             self.add_token(keywords[identifier_text])
         else:
             self.add_token(TokenType.IDENTIFIER)
-
-
-class ScanException(Exception):
-    char: str
-    line: int
-    current: int
-    message: str
-
-    def __init__(self, ｃhar: str, message: str, line: int, current: int):
-        super().__init__(message)
-
-        self.char = char
-        self.line = line
-        self.current = current
-        self.message = message + f"({char})"

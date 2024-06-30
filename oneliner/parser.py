@@ -1,18 +1,16 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr, TernaryExpr, VariableExpr
+    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt
-
-
-class ParseError(Exception):
-    pass
+from oneliner.error import ParseError, ErrorReporter
 
 
 class Parser:
 
-    def __init__(self, tokens: list[Token]):
+    def __init__(self, tokens: list[Token], error_reporter: ErrorReporter):
         self.current: int = 0
         self.tokens = tokens
+        self.error_reporter = error_reporter
 
     def parse(self) -> list[Stmt]:
         try:
@@ -63,7 +61,20 @@ class Parser:
         return ExpressionStmt(expr)
 
     def expression(self) -> Expr:
-        return self.ternary()
+        return self.assignment()
+
+    def assignment(self) -> Expr:
+        expr = self.ternary()
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, VariableExpr):
+                name: Token = expr.name
+                return AssignExpr(name, value)
+
+            self.error(equals, "Invalid assignment target.")
+        return expr
 
     def ternary(self) -> Expr:
         expr = self.equality()
@@ -168,8 +179,7 @@ class Parser:
         raise self.error(self.peek(), message)
 
     def error(self, token: Token, message: str) -> ParseError:
-        # XXX:
-        # main.error(token, message)
+        self.error_reporter.token_error(token, message)
         return ParseError(f"[line {token.line}] Error: {message}")
 
     def synchronize(self):
