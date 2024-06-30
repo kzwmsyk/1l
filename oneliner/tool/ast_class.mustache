@@ -1,0 +1,29 @@
+{{imports}}
+
+
+class {{base_name}}:
+    # Visitor Interface
+    # class Visitor<R>:
+    #     R visit_foo_stmt(Foo stmt)
+    #     R visit_bar_expr(Bar expr)
+
+    def accept(visitor):
+        pass
+{{#types}}
+
+
+class {{subclass_name}}{{base_name}}({{base_name}}):
+    {{#fields}}
+    {{name}}: {{type}}
+    {{/fields}}
+
+    def __init__(self,{{#fields}}
+                 {{name}}: {{type}}{{^is_last}},{{/is_last}}{{/fields}}):
+
+    {{#fields}}
+        self.{{name}} = {{name}}
+    {{/fields}}
+
+    def accept(self, visitor):
+        return visitor.visit_{{subclass_name_lc}}_{{base_name_lc}}(self)
+{{/types}}
