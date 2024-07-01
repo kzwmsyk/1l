@@ -27,6 +27,8 @@ class Interpreter:
     def stringify(self, value):
         if value is None:
             return "nil"
+        elif isinstance(value, bool):
+            return str(value).lower()
         else:
             return str(value)
 
