@@ -1,4 +1,5 @@
 from oneliner.token import Token, TokenType
+from oneliner.expr import Expr
 
 
 class ErrorReporter():
@@ -46,3 +47,10 @@ class InterpretError(Exception):
     def __init__(self, token: Token, message: str):
         self.token = token
         self.message = message
+
+# return is a special case of InterpretError
+
+
+class Return(InterpretError):
+    def __init__(self, value: Expr):
+        self.value = value

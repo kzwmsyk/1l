@@ -1,8 +1,9 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
+    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
+    CallExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt, WhileStmt
+    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
 
 
@@ -28,6 +29,8 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
             if self.match(TokenType.VAR):
                 return self.var_declaration()
             return self.statement()
@@ -48,12 +51,38 @@ class Parser:
                      "Expect ';' after variable declaration.")
         return VarStmt(name, initializer)
 
-    def function(self, kind: str) -> Stmt:
-        pass
+    def function(self, kind: str) -> FunctionStmt:
+        name = self.consume(TokenType.IDENTIFIER, "Expect " + kind + " name.")
+
+        self.consume(TokenType.LEFT_PAREN,
+                     "Expect '(' after " + kind + " name.")
+
+        parameters = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) > 255:
+                    self.error_reporter.token_error(
+                        self.peek(),
+                        "Can't have more than 255 parameters."
+                    )
+                parameters.append(self.consume(
+                    TokenType.IDENTIFIER, "Expect parameter name."))
+
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self.consume(TokenType.LEFT_BRACE,
+                     "Expect '{' before " + kind + " body.")
+        body: list[Stmt] = self.block_statement()
+        return FunctionStmt(name, parameters, body)
 
     def statement(self) -> Stmt:
         if self.match(TokenType.PRINT):
             return self.print_statement()
+
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
 
         if self.match(TokenType.LEFT_BRACE):
             return BlockStmt(self.block_statement())
@@ -74,6 +103,15 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return PrintStmt(expr)
+
+    def return_statement(self) -> Stmt:
+        keyword = self.previous()
+        value = None
+        if (not self.check(TokenType.SEMICOLON)):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return ReturnStmt(keyword, value)
 
     def expression_statement(self) -> Stmt:
         expr = self.expression()
@@ -258,7 +296,34 @@ class Parser:
             operator = self.previous()
             right = self.unary()
             return UnaryExpr(operator, right)
-        return self.primary()
+        return self.call()
+
+    def call(self) -> Expr:
+        expr = self.primary()
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finish_call(expr)
+            else:
+                break
+        return expr
+
+    def finish_call(self, callee: Expr) -> Expr:
+        arguments: list[Expr] = []
+
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) >= 255:
+                    self.error_reporter.token_error(
+                        self.peek(),
+                        "Can't have more than 255 ar====guments."
+                    )
+                arguments.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        paren = self.consume(TokenType.RIGHT_PAREN,
+                             "Expect ')' after arguments.")
+        return CallExpr(callee, paren, arguments)
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):

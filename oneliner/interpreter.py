@@ -1,17 +1,20 @@
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
-    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr
+    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
+    CallExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt, WhileStmt
-from oneliner.error import InterpretError, ErrorReporter
+    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
+from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
+from oneliner.function import Function, Callable
 
 
 class Interpreter:
     # ExprVisitor, StmtVisitor
+    global_env = Environment()
 
     def __init__(self, error_reporter: ErrorReporter):
-        self.environment = Environment()
+        self.environment = Interpreter.global_env
         self.error_reporter = error_reporter
 
     def interpret(self, statements: list[Stmt]):
@@ -36,8 +39,19 @@ class Interpreter:
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
 
+    def visit_return_stmt(self, stmt: ReturnStmt) -> None:
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+
+        raise Return(value)
+
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
         self.evaluate(stmt.expression)
+
+    def visit_function_stmt(self, stmt: FunctionStmt) -> None:
+        function = Function(stmt, self.environment)
+        self.environment.define(stmt.name.lexeme, function)
 
     def visit_var_stmt(self, stmt: VarStmt) -> None:
         value = None
@@ -183,3 +197,18 @@ class Interpreter:
 
     def visit_variable_expr(self, expr: VariableExpr):
         return self.environment.get(expr.name)
+
+    def visit_call_expr(self, expr: CallExpr):
+        callee = self.evaluate(expr.callee)
+        arguments = [self.evaluate(arg) for arg in expr.arguments]
+        if not isinstance(callee, Callable):
+            raise InterpretError(
+                expr.paren, "Can only callable functions and classes.")
+
+        if len(arguments) != callee.arity():
+            raise InterpretError(
+                expr.paren,
+                f"Expected {callee.arity()} arguments but got {
+                    len(arguments)}."
+            )
+        return callee.call(self, arguments)
