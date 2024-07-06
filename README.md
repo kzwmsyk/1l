@@ -1,6 +1,6 @@
 # OneLiner
 
-[CRAFTING INTERPRETERS](https://craftinginterpreters.com)の[Lox](https://craftinginterpreters.com/the-lox-language.html)を元に実装して少し手を入れたスクリプト言語です。
+[CRAFTING INTERPRETERS](https://craftinginterpreters.com)の[Lox](https://craftinginterpreters.com/the-lox-language.html)のインタプリタ版を、書籍のJava実装を元にPythonで実装して少し手を入れたスクリプト言語です。
 
 1行でのプログラムが書きやすくなるように、以下の変更を加えています。
 
