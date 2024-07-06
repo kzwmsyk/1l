@@ -55,7 +55,7 @@ class Interpreter:
         self.evaluate(stmt.expression)
 
     def visit_function_stmt(self, stmt: FunctionStmt) -> None:
-        function = Function(stmt, self.environment)
+        function = Function(stmt, self.environment, is_initializer=False)
         self.environment.define(stmt.name.lexeme, function)
 
     def visit_var_stmt(self, stmt: VarStmt) -> None:
@@ -81,7 +81,8 @@ class Interpreter:
         self.environment.define(stmt.name.lexeme, None)
         methods = {}
         for method in stmt.methods:
-            function = Function(method, self.environment)
+            function = Function(method, self.environment,
+                                is_initializer=method.name.lexeme == "init")
             methods[method.name.lexeme] = function
 
         klass = Klass(stmt.name, methods)

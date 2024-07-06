@@ -66,7 +66,10 @@ class Resolver():
         self.scopes[-1]["this"] = True
 
         for method in stmt.methods:
-            self.resolve_function(method, FunctionType.METHOD)
+            function_type = FunctionType.METHOD
+            if method.name.lexeme == "init":
+                function_type = FunctionType.INITIALIZER
+            self.resolve_function(method, function_type)
 
         self.end_scope()
         self.current_class = enclosing_class
@@ -159,6 +162,11 @@ class Resolver():
                 "Can't return from top-level code.")
 
         if stmt.value is not None:
+            if self.current_function == FunctionType.INITIALIZER:
+                self.error_reporter.error(
+                    stmt.keyword,
+                    "Can't return a value from an initializer.")
+
             self.resolve(stmt.value)
 
     def visit_while_stmt(self, stmt: WhileStmt) -> None:
