@@ -33,5 +33,10 @@ class Function(Callable):
             return return_value.value
         return None
 
+    def bind(self, instance):
+        environment: Environment = Environment(self.closure)
+        environment.define("this", instance)
+        return Function(self.declaration, environment)
+
     def __str__(self):
         return "<fun " + self.declaration.name.lexeme + ">"

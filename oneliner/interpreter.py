@@ -1,9 +1,10 @@
+from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
-from oneliner.expr import Expr, LiteralExpr, GroupingExpr, UnaryExpr, \
+from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, UnaryExpr, \
     BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
-    CallExpr
+    CallExpr, GetExpr, ThisExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
+    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
 from oneliner.function import Function, Callable
@@ -75,6 +76,16 @@ class Interpreter:
                 self.execute(statement)
         finally:
             self.environment = previous
+
+    def visit_class_stmt(self, stmt: ClassStmt):
+        self.environment.define(stmt.name.lexeme, None)
+        methods = {}
+        for method in stmt.methods:
+            function = Function(method, self.environment)
+            methods[method.name.lexeme] = function
+
+        klass = Klass(stmt.name, methods)
+        self.environment.assign(stmt.name, klass)
 
     def visit_if_stmt(self, stmt: IfStmt) -> None:
         if self.is_truthy(self.evaluate(stmt.condition)):
@@ -228,3 +239,24 @@ class Interpreter:
                     len(arguments)}."
             )
         return callee.call(self, arguments)
+
+    def visit_get_expr(self, expr: GetExpr):
+        object = self.evaluate(expr.object)
+        if isinstance(object, Instance):
+            return object.get(expr.name)
+
+        raise InterpretError(expr.name,
+                             "Only instances have properties.")
+
+    def visit_set_expr(self, expr: SetExpr):
+        object = self.evaluate(expr.object)
+        if not isinstance(object, Instance):
+            raise InterpretError(expr.name,
+                                 "Only instances have fields.")
+
+        value = self.evaluate(expr.value)
+        object.set(expr.name, value)
+        return value
+
+    def visit_this_expr(self, expr: ThisExpr):
+        return self.look_up_variable(expr.keyword, expr)

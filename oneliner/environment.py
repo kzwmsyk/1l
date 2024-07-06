@@ -13,8 +13,8 @@ class Environment:
 
     def get_at(self, distance: int, name: str):
         env = self.ancestor(distance)
-        assert name in env
-        return env[name]
+        assert name in env.variables
+        return env.variables[name]
 
     def ancestor(self, distance: int):
         environment = self
@@ -43,5 +43,5 @@ class Environment:
 
     def assign_at(self, distance: int, name: Token, value):
         env = self.ancestor(distance)
-        assert name.lexeme in env
-        env[name.lexeme] = value
+        assert name.lexeme in env.variables
+        env.variables[name.lexeme] = value

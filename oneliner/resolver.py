@@ -1,11 +1,11 @@
 from oneliner.error import ErrorReporter
 from oneliner.token import Token
 from oneliner.interpreter import Interpreter
-from oneliner.expr import AssignExpr, BinaryExpr, Expr, TernaryExpr, \
+from oneliner.expr import AssignExpr, BinaryExpr, Expr, SetExpr, TernaryExpr, ThisExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
-    UnaryExpr
+    UnaryExpr, GetExpr
 from oneliner.stmt import BlockStmt, IfStmt, PrintStmt, Stmt, VarStmt, \
-    FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt
+    FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
 from enum import Enum, auto
 
 
@@ -46,6 +46,18 @@ class Resolver():
     def visit_block_stmt(self, stmt: BlockStmt) -> None:
         self.begin_scope()
         self.resolve(stmt.statements)
+        self.end_scope()
+
+    def visit_class_stmt(self, stmt: ClassStmt):
+        self.declare(stmt.name)
+        self.define(stmt.name)
+
+        self.begin_scope()
+        self.scopes[-1]["this"] = True
+
+        for method in stmt.methods:
+            self.resolve_function(method, FunctionType.METHOD)
+
         self.end_scope()
 
     def begin_scope(self) -> None:
@@ -156,6 +168,13 @@ class Resolver():
         for arg in expr.arguments:
             self.resolve(arg)
 
+    def visit_get_expr(self, expr: GetExpr) -> None:
+        self.resolve(expr.object)
+
+    def visit_set_expr(self, expr: SetExpr) -> None:
+        self.resolve(expr.value)
+        self.resolve(expr.object)
+
     def visit_grouping_expr(self, expr: GroupingExpr) -> None:
         self.resolve(expr.expression)
 
@@ -168,3 +187,6 @@ class Resolver():
 
     def visit_unary_expr(self, expr: UnaryExpr) -> None:
         self.resolve(expr.operand)
+
+    def visit_this_expr(self, expr: ThisExpr) -> None:
+        self.resolve_local(expr, expr.keyword)

@@ -1,9 +1,9 @@
 from oneliner.token import Token, TokenType
-from oneliner.expr import Expr, BinaryExpr, UnaryExpr, LiteralExpr, \
-    GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
-    CallExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
+from oneliner.expr import Expr, BinaryExpr, SetExpr, ThisExpr, UnaryExpr, \
+    LiteralExpr,  GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, \
+    LogicalExpr, CallExpr, GetExpr
+from oneliner.stmt import ClassStmt, Stmt, PrintStmt, ExpressionStmt, \
+    VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
 
 
@@ -29,6 +29,8 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.CLASS):
+                return self.class_declaration()
             if self.match(TokenType.FUN):
                 return self.function("function")
             if self.match(TokenType.VAR):
@@ -37,6 +39,17 @@ class Parser:
         except ParseError:
             self.synchronize()
             return None
+
+    def class_declaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+        self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        methods: list[FunctionStmt] = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            methods.append(self.function("method"))
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+        return ClassStmt(name, None, methods)
 
     def var_declaration(self):
 
@@ -202,6 +215,9 @@ class Parser:
             if isinstance(expr, VariableExpr):
                 name: Token = expr.name
                 return AssignExpr(name, value)
+            elif isinstance(expr, GetExpr):
+                get = expr
+                return SetExpr(get.object, get.name, value)
 
             self.error(equals, "Invalid assignment target.")
         return expr
@@ -303,6 +319,10 @@ class Parser:
         while True:
             if self.match(TokenType.LEFT_PAREN):
                 expr = self.finish_call(expr)
+            elif self.match(TokenType.DOT):
+                name = self.consume(TokenType.IDENTIFIER,
+                                    "Expect property name after '.'.")
+                expr = GetExpr(expr, name)
             else:
                 break
         return expr
@@ -335,6 +355,9 @@ class Parser:
 
         if self.match(TokenType.INT, TokenType.FLOAT, TokenType.STRING):
             return LiteralExpr(self.previous().literal)
+
+        if self.match(TokenType.THIS):
+            return ThisExpr(self.previous())
 
         if self.match(TokenType.IDENTIFIER):
             return VariableExpr(self.previous())
