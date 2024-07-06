@@ -1,7 +1,7 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, SetExpr, ThisExpr, UnaryExpr, \
     LiteralExpr,  GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, \
-    LogicalExpr, CallExpr, GetExpr
+    LogicalExpr, CallExpr, GetExpr, SuperExpr
 from oneliner.stmt import ClassStmt, Stmt, PrintStmt, ExpressionStmt, \
     VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
@@ -42,6 +42,12 @@ class Parser:
 
     def class_declaration(self):
         name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+
+        superclass = None
+        if self.match(TokenType.LESS):
+            self.consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            superclass = VariableExpr(self.previous())
+
         self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
 
         methods: list[FunctionStmt] = []
@@ -49,7 +55,7 @@ class Parser:
             methods.append(self.function("method"))
 
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
-        return ClassStmt(name, None, methods)
+        return ClassStmt(name, superclass, methods)
 
     def var_declaration(self):
 
@@ -355,6 +361,13 @@ class Parser:
 
         if self.match(TokenType.INT, TokenType.FLOAT, TokenType.STRING):
             return LiteralExpr(self.previous().literal)
+
+        if self.match(TokenType.SUPER):
+            keyword = self.previous()
+            self.consume(TokenType.DOT, "Expect '.' after 'super'.")
+            method = self.consume(TokenType.IDENTIFIER,
+                                  "Expect superclass method name.")
+            return SuperExpr(keyword, method)
 
         if self.match(TokenType.THIS):
             return ThisExpr(self.previous())

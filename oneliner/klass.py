@@ -2,11 +2,15 @@ from oneliner.token import Token
 from oneliner.function import Function, Callable
 from oneliner.expr import Expr
 from oneliner.error import InterpretError
+from typing import Self
 
 
 class Klass(Callable):
-    def __init__(self, name: Token, methods: dict[str, Function]):
+    def __init__(self, name: Token,
+                 superclass: Self | None,
+                 methods: dict[str, Function]):
         self.name = name
+        self.superclass = superclass
         self.methods = methods
 
     def __str__(self):
@@ -15,6 +19,10 @@ class Klass(Callable):
     def find_method(self, name: str) -> Function | None:
         if name in self.methods:
             return self.methods[name]
+
+        if self.superclass is not None:
+            return self.superclass.find_method(name)
+
         return None
 
     def call(self, interpreter, arguments: list[Expr]):

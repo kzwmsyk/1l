@@ -3,7 +3,7 @@ from oneliner.token import Token
 from oneliner.interpreter import Interpreter
 from oneliner.expr import AssignExpr, BinaryExpr, Expr, SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
-    UnaryExpr, GetExpr, ThisExpr
+    UnaryExpr, GetExpr, ThisExpr, SuperExpr
 from oneliner.stmt import BlockStmt, IfStmt, PrintStmt, Stmt, VarStmt, \
     FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
 from enum import Enum, auto
@@ -62,6 +62,17 @@ class Resolver():
         self.declare(stmt.name)
         self.define(stmt.name)
 
+        if stmt.superclass is not None:
+            self.current_class = ClassType.SUBCLASS
+            if stmt.name.lexeme == stmt.superclass.name.lexeme:
+                self.error_reporter.error(
+                    stmt.name, "A class can't inherit from itself.")
+                return
+            self.resolve(stmt.superclass)
+
+            self.begin_scope()
+            self.scopes[-1]["super"] = True
+
         self.begin_scope()
         self.scopes[-1]["this"] = True
 
@@ -72,6 +83,10 @@ class Resolver():
             self.resolve_function(method, function_type)
 
         self.end_scope()
+
+        if stmt.superclass is not None:
+            self.end_scope()
+
         self.current_class = enclosing_class
 
     def begin_scope(self) -> None:
@@ -211,6 +226,20 @@ class Resolver():
         if self.current_class == ClassType.NONE:
             self.error_reporter.error(
                 expr.keyword, "Can't use 'this' outside of a class.")
+            return
+
+        self.resolve_local(expr, expr.keyword)
+
+    def visit_super_expr(self, expr: SuperExpr):
+        if self.current_class == ClassType.NONE:
+            self.error_reporter.error(
+                expr.keyword, "Can't use 'super' outside of a class.")
+            return
+        elif self.current_class == ClassType.CLASS:
+            self.error_reporter.error(
+                expr.keyword,
+                "Can't use 'super' in a class with no superclass."
+            )
             return
 
         self.resolve_local(expr, expr.keyword)

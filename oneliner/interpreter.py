@@ -1,8 +1,8 @@
 from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
-    BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
-    CallExpr, GetExpr, ThisExpr, UnaryExpr
+    BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
+    LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
@@ -78,14 +78,29 @@ class Interpreter:
             self.environment = previous
 
     def visit_class_stmt(self, stmt: ClassStmt):
+        superclass = None
+        if stmt.superclass is not None:
+            superclass = self.evaluate(stmt.superclass)
+            if not isinstance(superclass, Klass):
+                raise InterpretError(stmt.superclass.name,
+                                     "Superclass must be a class.")
+
         self.environment.define(stmt.name.lexeme, None)
+        if stmt.superclass is not None:
+            self.environment = Environment(self.environment)
+            self.environment.define("super", superclass)
+
         methods = {}
         for method in stmt.methods:
             function = Function(method, self.environment,
                                 is_initializer=method.name.lexeme == "init")
             methods[method.name.lexeme] = function
 
-        klass = Klass(stmt.name, methods)
+        klass = Klass(stmt.name, superclass, methods)
+
+        if superclass is not None:
+            self.environment = self.environment.enclosing
+
         self.environment.assign(stmt.name, klass)
 
     def visit_if_stmt(self, stmt: IfStmt) -> None:
@@ -261,3 +276,14 @@ class Interpreter:
 
     def visit_this_expr(self, expr: ThisExpr):
         return self.look_up_variable(expr.keyword, expr)
+
+    def visit_super_expr(self, expr: SuperExpr):
+        distance = self.locals.get(expr, None)
+        superclass = self.environment.get_at(distance, "super")
+        object = self.environment.get_at(distance - 1, "this")
+
+        method = superclass.find_method(expr.method.lexeme)
+        if method is None:
+            raise InterpretError(expr.method,
+                                 f"Undefined property '{expr.method.lexeme}'.")
+        return method.bind(object)
