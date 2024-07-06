@@ -180,13 +180,14 @@ class Interpreter:
             case TokenType.PLUS:
                 if self.is_numeric(left) and self.is_numeric(right):
                     return left + right
-                elif isinstance(left, str) and isinstance(right, str):
-                    return left + right
                 else:
-                    raise InterpretError(
-                        expr.operator,
-                        "Operands must be two numbers or two strings"
-                    )
+                    return self.stringify(left) + self.stringify(right)
+                #
+                # else:
+                #     raise InterpretError(
+                #         expr.operator,
+                #         "Operands must be two numbers or two strings"
+                #     )
             case TokenType.MINUS:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left - right

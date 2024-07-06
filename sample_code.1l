@@ -1,1 +1,65 @@
-a b c
+fun fib(n) {
+    return n < 2 ? n : fib(n - 1) + fib(n - 2);
+}
+p fib(5);
+
+fun make_counter() {
+    var c = 0;
+    fun count() {
+        c = c + 1;
+        return c;
+    }
+    return count;
+}
+
+var c1 = make_counter();
+var c2 = make_counter();
+
+for(var i = 0; i < 10; i = i+1) {
+    c1();
+}
+p c1();
+
+for(var i = 0; i < 5; i = i+1) {
+    c2();
+}
+p c2();
+
+p c1();
+
+class Animal {
+    init() {
+        this.age = 0;
+    }
+    die() {
+        p "dead at " + this.age + " years old";
+    }
+    live_a_year() {
+        this.age = this.age + 1;
+    }
+}
+
+class Human < Animal {
+    init(name) {
+        super.init();
+        this.name = name;
+    }
+    die() {
+        p this.name + " is dead at " + this.age + " years old";
+    }
+    die_a_dogs_death() {
+        super.die();
+    }
+}
+
+var s = Human("Socrates");
+for (var i = 0; i < 70; i = i+1) {
+    s.live_a_year();
+}
+s.die();
+
+var d = Human("Diogenes");
+for (var i = 0; i < 90; i = i+1) {
+    d.live_a_year();
+}
+d.die_a_dogs_death();
