@@ -1,8 +1,8 @@
 from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
-from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, UnaryExpr, \
+from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
     BinaryExpr, TernaryExpr, VariableExpr, AssignExpr, LogicalExpr, \
-    CallExpr, GetExpr, ThisExpr
+    CallExpr, GetExpr, ThisExpr, UnaryExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return

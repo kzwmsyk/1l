@@ -1,9 +1,9 @@
 from oneliner.error import ErrorReporter
 from oneliner.token import Token
 from oneliner.interpreter import Interpreter
-from oneliner.expr import AssignExpr, BinaryExpr, Expr, SetExpr, TernaryExpr, ThisExpr, \
+from oneliner.expr import AssignExpr, BinaryExpr, Expr, SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
-    UnaryExpr, GetExpr
+    UnaryExpr, GetExpr, ThisExpr
 from oneliner.stmt import BlockStmt, IfStmt, PrintStmt, Stmt, VarStmt, \
     FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
 from enum import Enum, auto
