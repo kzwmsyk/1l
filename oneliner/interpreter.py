@@ -132,12 +132,11 @@ class Interpreter:
 
     def visit_unary_expr(self, expr: UnaryExpr):
         operand = self.evaluate(expr.operand)
-
         match expr.operator.type:
             case TokenType.MINUS:
                 self.check_numeric_operand(expr.operator, operand)
                 return - operand
-            case TokenType.NOT:
+            case TokenType.NOT | TokenType.BANG:
                 return not self.is_truthy(operand)
             case _:
                 raise InterpretError(expr.operator, "Unreachable")
@@ -163,12 +162,13 @@ class Interpreter:
     def visit_logical_expr(self, expr: LogicalExpr):
         left = self.evaluate(expr.left)
 
-        if expr.operator.type == TokenType.OR:
-            if self.is_truthy(left):
-                return left
-        else:
-            if not self.is_truthy(left):
-                return left
+        match expr.operator.type:
+            case TokenType.OR | TokenType.DOUBLE_PIPE:
+                if self.is_truthy(left):
+                    return left
+            case TokenType.AND | TokenType.DOUBLE_AMPERSAND:
+                if not self.is_truthy(left):
+                    return left
 
         return self.evaluate(expr.right)
 
@@ -182,12 +182,6 @@ class Interpreter:
                     return left + right
                 else:
                     return self.stringify(left) + self.stringify(right)
-                #
-                # else:
-                #     raise InterpretError(
-                #         expr.operator,
-                #         "Operands must be two numbers or two strings"
-                #     )
             case TokenType.MINUS:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left - right
@@ -197,6 +191,11 @@ class Interpreter:
             case TokenType.SLASH:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left / right
+            case TokenType.DOUBLE_SLASH:
+                return left // right
+            case TokenType.PERCENT:
+                self.check_numeric_operands(expr.operator, left, right)
+                return left % right
             case TokenType.GREATER:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left > right
@@ -209,7 +208,7 @@ class Interpreter:
             case TokenType.LESS_EQUAL:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left <= right
-            case TokenType.EQUAL_EQUAL:
+            case TokenType.DOUBLE_EQUAL:
                 return self.is_equal(left, right)
             case TokenType.BANG_EQUAL:
                 return not self.is_equal(left, right)
@@ -231,6 +230,10 @@ class Interpreter:
             return False
         if isinstance(object, bool):
             return object
+        if isinstance(object, float):
+            return object != 0
+        if isinstance(object, int):
+            return object != 0
         return True
 
     def visit_variable_expr(self, expr: VariableExpr):

@@ -239,7 +239,7 @@ class Parser:
 
     def logical_or(self) -> Expr:
         expr = self.logical_and()
-        while self.match(TokenType.OR):
+        while self.match(TokenType.OR, TokenType.DOUBLE_PIPE):
             operator = self.previous()
             right = self.logical_and()
             expr = LogicalExpr(expr, operator, right)
@@ -247,7 +247,7 @@ class Parser:
 
     def logical_and(self) -> Expr:
         expr = self.equality()
-        while self.match(TokenType.AND):
+        while self.match(TokenType.AND, TokenType.DOUBLE_AMPERSAND):
             operator = self.previous()
             right = self.equality()
             expr = LogicalExpr(expr, operator, right)
@@ -255,7 +255,7 @@ class Parser:
 
     def equality(self) -> Expr:
         expr = self.comparison()
-        while (self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)):
+        while (self.match(TokenType.BANG_EQUAL, TokenType.DOUBLE_EQUAL)):
             operator = self.previous()
             right = self.comparison()
             expr = BinaryExpr(expr, operator, right)
@@ -307,14 +307,17 @@ class Parser:
 
     def factor(self) -> Expr:
         expr = self.unary()
-        while (self.match(TokenType.SLASH, TokenType.STAR)):
+        while (self.match(TokenType.SLASH,
+                          TokenType.DOUBLE_SLASH,
+                          TokenType.STAR,
+                          TokenType.PERCENT)):
             operator = self.previous()
             right = self.unary()
             expr = BinaryExpr(expr, operator, right)
         return expr
 
     def unary(self) -> Expr:
-        if self.match(TokenType.BANG, TokenType.MINUS):
+        if self.match(TokenType.BANG, TokenType.NOT, TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
             return UnaryExpr(operator, right)

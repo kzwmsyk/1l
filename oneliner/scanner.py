@@ -8,19 +8,24 @@ keywords = {
     "class": TokenType.CLASS,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
+    "f": TokenType.FALSE,
     "for": TokenType.FOR,
     "fun": TokenType.FUN,
+    "fn": TokenType.FUN,
     "if": TokenType.IF,
     "nil": TokenType.NIL,
     "or": TokenType.OR,
     "p": TokenType.PRINT,
     "print": TokenType.PRINT,
+    "not":  TokenType.NOT,
     "return": TokenType.RETURN,
     "super": TokenType.SUPER,
     "this": TokenType.THIS,
     "true": TokenType.TRUE,
+    "t": TokenType.TRUE,
     "var": TokenType.VAR,
-    "while": TokenType.WHILE,
+    "v": TokenType.VAR,
+    "while": TokenType.WHILE
 }
 
 
@@ -75,7 +80,7 @@ class Scanner:
                                if self.match("=")
                                else TokenType.BANG)
             case "=":
-                self.add_token(TokenType.EQUAL_EQUAL
+                self.add_token(TokenType.DOUBLE_EQUAL
                                if self.match("=")
                                else TokenType.EQUAL)
             case "<":
@@ -86,18 +91,30 @@ class Scanner:
                 self.add_token(TokenType.GREATER_EQUAL
                                if self.match("=")
                                else TokenType.GREATER)
+
+            case "&":
+                self.add_token(TokenType.DOUBLE_AMPERSAND
+                               if self.match("&")
+                               else TokenType.AMPERSAND)
+            case "|":
+                self.add_token(TokenType.DOUBLE_PIPE
+                               if self.match("|")
+                               else TokenType.PIPE)
+            case "%":
+                self.add_token(TokenType.PERCENT)
+            case "#":
+                # コメント
+                while self.peek() != "\n/" and not self.is_at_end():
+                    self.advance()
             case "/":
-                if self.match("/"):
-                    # //コメント。行末まで読み捨て
-                    while self.peek() != "\n" and not self.is_at_end():
-                        self.advance()
-                else:
-                    self.add_token(TokenType.SLASH)
+                self.add_token(TokenType.DOUBLE_SLASH
+                               if self.match("/")
+                               else TokenType.SLASH)
             case " " | "\t" | "\r":
                 pass
             case "\n":
                 self.line += 1
-            case "\"" | "'":
+            case '"' | "'":
                 self.string(char)
             case _:
                 if self.is_digit(char):

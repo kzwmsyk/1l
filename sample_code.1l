@@ -4,10 +4,10 @@ fun fib(n) {
 p fib(5);
 
 fun make_counter() {
-    var c = 0;
+    var i = 0;
     fun count() {
-        c = c + 1;
-        return c;
+        i = i + 1;
+        return i;
     }
     return count;
 }
@@ -63,3 +63,6 @@ for (var i = 0; i < 90; i = i+1) {
     d.live_a_year();
 }
 d.die_a_dogs_death();
+
+
+
