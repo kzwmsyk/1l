@@ -3,7 +3,13 @@ from oneliner.error import ScanError, ErrorReporter
 from oneliner.parser import Parser
 from oneliner.ast_printer import AstPrinter
 from oneliner.interpreter import Interpreter
+from oneliner.resolver import Resolver
 import readline
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class Runner:
@@ -38,7 +44,7 @@ class Runner:
                 print("\nexit")
                 break
             except Exception as e:
-                print(f"エラー: {e}")
+                logger.exception("error: %s", e)
 
     def run(self, code: str, args: list[str] = []):
         scanner = Scanner(code, self.error_reporter)
@@ -55,6 +61,11 @@ class Runner:
             if self.is_debug:
                 printer = AstPrinter(self)
                 print(printer.print(statements))
+
+            resolver = Resolver(self.interpreter, self.error_reporter)
+            resolver.resolve(statements)
+            if self.error_reporter.has_error:
+                return
 
             self.interpreter.interpret(statements)
 

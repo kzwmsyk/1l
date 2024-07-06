@@ -11,10 +11,11 @@ from oneliner.function import Function, Callable
 
 class Interpreter:
     # ExprVisitor, StmtVisitor
-    global_env = Environment()
+    globals = Environment()
 
     def __init__(self, error_reporter: ErrorReporter):
-        self.environment = Interpreter.global_env
+        self.environment = Interpreter.globals
+        self.locals = {}
         self.error_reporter = error_reporter
 
     def interpret(self, statements: list[Stmt]):
@@ -34,6 +35,9 @@ class Interpreter:
             return str(value).lower()
         else:
             return str(value)
+
+    def resolve(self, expr: Expr, depth: int):
+        self.locals[expr] = depth
 
     def visit_print_stmt(self, stmt: PrintStmt) -> None:
         value = self.evaluate(stmt.expression)
@@ -84,7 +88,13 @@ class Interpreter:
 
     def visit_assign_expr(self, expr: AssignExpr):
         value = self.evaluate(expr.value)
-        self.environment.assign(expr.name, value)
+
+        distance = self.locals.get(expr, None)
+        if distance is not None:
+            self.environment.assign_at(distance, expr.name, value)
+        else:
+            self.environment.assign(expr.name, value)
+
         return value
 
     def visit_literal_expr(self, expr: LiteralExpr):
@@ -196,7 +206,13 @@ class Interpreter:
         return True
 
     def visit_variable_expr(self, expr: VariableExpr):
-        return self.environment.get(expr.name)
+        return self.look_up_variable(expr.name, expr)
+
+    def look_up_variable(self, name: Token, expr: Expr):
+        distance = self.locals.get(expr, None)
+        if distance is not None:
+            return self.environment.get_at(distance, name.lexeme)
+        return self.globals.get(name)
 
     def visit_call_expr(self, expr: CallExpr):
         callee = self.evaluate(expr.callee)
