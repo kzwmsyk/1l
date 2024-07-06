@@ -104,7 +104,7 @@ class Scanner:
                 self.add_token(TokenType.PERCENT)
             case "#":
                 # コメント
-                while self.peek() != "\n/" and not self.is_at_end():
+                while self.peek() != "\n" and not self.is_at_end():
                     self.advance()
             case "/":
                 self.add_token(TokenType.DOUBLE_SLASH

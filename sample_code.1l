@@ -1,3 +1,7 @@
+
+p 13 // 5; # 2
+p 13 % 5;  # 3
+
 fun fib(n) {
     return n < 2 ? n : fib(n - 1) + fib(n - 2);
 }
@@ -63,6 +67,4 @@ for (var i = 0; i < 90; i = i+1) {
     d.live_a_year();
 }
 d.die_a_dogs_death();
-
-
 
