@@ -42,9 +42,7 @@ whileStmt      ::= "while" "(" expression ")" statement ;
 block          ::= "{" declaration* "}" ;
 ```
 
-varDecl, exprStmt, printStmt, retrunStmtのセミコロンは、以下の場合において省略可能で∃。
-- プログラム末尾
-- ブロックの末尾
+semicolons of varDecl, exprStmt, printStmt, retrunStmt are omittable at the end of program or block.
 
 
 ## Expressions
