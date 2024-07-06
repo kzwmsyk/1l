@@ -65,9 +65,7 @@ class Parser:
 
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
-
-        self.consume(TokenType.SEMICOLON,
-                     "Expect ';' after variable declaration.")
+        self.consume_semicolon_or_ignore()
         return VarStmt(name, initializer)
 
     def function(self, kind: str) -> FunctionStmt:
@@ -120,21 +118,21 @@ class Parser:
 
     def print_statement(self) -> Stmt:
         expr = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        self.consume_semicolon_or_ignore()
         return PrintStmt(expr)
 
     def return_statement(self) -> Stmt:
         keyword = self.previous()
         value = None
-        if (not self.check(TokenType.SEMICOLON)):
+        if not self.check(TokenType.SEMICOLON) \
+                and not self.check(TokenType.RIGHT_BRACE):
             value = self.expression()
-
-        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        self.consume_semicolon_or_ignore()
         return ReturnStmt(keyword, value)
 
     def expression_statement(self) -> Stmt:
         expr = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        self.consume_semicolon_or_ignore()
         return ExpressionStmt(expr)
 
     def block_statement(self) -> list[Stmt]:
@@ -389,6 +387,15 @@ class Parser:
         if self.check(type):
             return self.advance()
         raise self.error(self.peek(), message)
+
+    def consume_semicolon_or_ignore(self):
+        "セミコロンを消費するが、プログラム末尾またはブロックの最後では省略できる"
+
+        if self.is_at_end():
+            return
+        if self.check(TokenType.RIGHT_BRACE):
+            return
+        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
 
     def error(self, token: Token, message: str) -> ParseError:
         self.error_reporter.token_error(token, message)
