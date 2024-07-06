@@ -1,0 +1,17 @@
+# いくつかの予約語に短いバージョンがある。
+# var: v
+# fun: fn
+# true: t
+# false: f
+# print: p
+
+
+# ブロックの最後の式文、print文、return文はセミコロンを省略可能
+v a = 1;
+fn b(i) { p a + i }
+b(15);
+
+fn ternary(bool) {return bool ? "TRUE" : "FALSE"}
+p ternary(t);
+# プログラムの最後の式文、print文、return文もセミコロンを省略可能
+p ternary(f)

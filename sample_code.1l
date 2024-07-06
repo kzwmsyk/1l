@@ -1,4 +1,6 @@
+# コメントは # から行末まで。
 
+# // % は整数の割り算の商と剰余
 p 13 // 5; # 2
 p 13 % 5;  # 3
 
@@ -66,5 +68,5 @@ var d = Human("Diogenes");
 for (var i = 0; i < 90; i = i+1) {
     d.live_a_year();
 }
-d.die_a_dogs_death();
 
+d.die_a_dogs_death();
