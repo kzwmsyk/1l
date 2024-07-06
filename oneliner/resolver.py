@@ -16,6 +16,12 @@ class FunctionType(Enum):
     INITIALIZER = auto()
 
 
+class ClassType(Enum):
+    NONE = auto()
+    CLASS = auto()
+    SUBCLASS = auto()
+
+
 class Resolver():
     def __init__(self,
                  interpreter: Interpreter,
@@ -24,6 +30,7 @@ class Resolver():
         self.error_reporter = error_reporter
         self.scopes: list[dict[str, bool]] = []
         self.current_function = FunctionType.NONE
+        self.current_class = ClassType.NONE
 
     def resolve(self, obj) -> None:
         if isinstance(obj, Expr):
@@ -49,6 +56,9 @@ class Resolver():
         self.end_scope()
 
     def visit_class_stmt(self, stmt: ClassStmt):
+        enclosing_class = self.current_class
+        self.current_class = ClassType.CLASS
+
         self.declare(stmt.name)
         self.define(stmt.name)
 
@@ -59,6 +69,7 @@ class Resolver():
             self.resolve_function(method, FunctionType.METHOD)
 
         self.end_scope()
+        self.current_class = enclosing_class
 
     def begin_scope(self) -> None:
         scope: dict[str, bool] = {}
@@ -189,4 +200,9 @@ class Resolver():
         self.resolve(expr.operand)
 
     def visit_this_expr(self, expr: ThisExpr) -> None:
+        if self.current_class == ClassType.NONE:
+            self.error_reporter.error(
+                expr.keyword, "Can't use 'this' outside of a class.")
+            return
+
         self.resolve_local(expr, expr.keyword)
