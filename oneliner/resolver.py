@@ -17,7 +17,9 @@ class FunctionType(Enum):
 
 
 class Resolver():
-    def __init__(self, interpreter: Interpreter, error_reporter: ErrorReporter):
+    def __init__(self,
+                 interpreter: Interpreter,
+                 error_reporter: ErrorReporter):
         self.interpreter = interpreter
         self.error_reporter = error_reporter
         self.scopes: list[dict[str, bool]] = []
