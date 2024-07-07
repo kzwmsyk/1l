@@ -108,6 +108,9 @@ class Parser:
         if self.match(TokenType.IF):
             return self.if_statement()
 
+        if self.match(TokenType.DO):
+            return self.do_while_statement()
+
         if self.match(TokenType.WHILE):
             return self.while_statement()
 
@@ -164,7 +167,23 @@ class Parser:
         body = self.statement()
         return WhileStmt(condition, body)
 
+    def do_while_statement(self) -> Stmt:
+        body = self.statement()
+
+        self.consume(TokenType.WHILE, "Exept while after do block")
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN,
+                     "Expect ')' after while condition.")
+
+        block = BlockStmt([
+            body,
+            WhileStmt(condition, body)
+        ])
+        return block
+
     # for(initializer; condition: ) {}
+
     def for_statement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
 

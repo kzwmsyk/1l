@@ -15,5 +15,17 @@ b(15);
 
 fn ternary(bool) {return bool ? "TRUE" : "FALSE"}
 p ternary(t);
+p ternary(f);
+
+# do while実装済み
+
+var a = 3;
+do {
+    p a;
+    a = a - 1;
+} while (a < 0)
+
+p a;
+
 # プログラムの最後の式文、print文、return文もセミコロンを省略可能
-p ternary(f)
+p 1+1

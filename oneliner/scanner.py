@@ -7,6 +7,7 @@ keywords = {
     "and": TokenType.AND,
     "class": TokenType.CLASS,
     "cls": TokenType.CLASS,
+    "do": TokenType.DO,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "f": TokenType.FALSE,
