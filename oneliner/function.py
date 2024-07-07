@@ -1,7 +1,9 @@
+from oneliner.expr import FunctionExpr
 from oneliner.stmt import FunctionStmt
 from oneliner.environment import Environment
 from abc import ABC, abstractmethod
 from oneliner.error import Return
+from oneliner.token import Token
 
 
 class Callable(ABC):
@@ -15,23 +17,31 @@ class Callable(ABC):
 
 
 class Function(Callable):
-    def __init__(self, declaration: FunctionStmt,
-                 closure: Environment,
-                 is_initializer: bool):
-        self.is_initializer = is_initializer
-        self.declaration: FunctionStmt = declaration
+    def __init__(self,
+                 stmt: FunctionStmt | None = None,
+                 name: Token | None = None,
+                 expr: FunctionExpr | None = None,
+                 closure: Environment = None,
+                 is_initializer: bool = False):
+        if stmt is not None:
+            self.name = stmt.name
+            self.expr = stmt.function
+        else:
+            self.name = name
+            self.expr = expr
         self.closure: Environment = closure
+        self.is_initializer = is_initializer
 
     def arity(self) -> int:
-        return len(self.declaration.params)
+        return len(self.expr.params)
 
     def call(self, interpreter, arguments: list):
         environment: Environment = Environment(self.closure)
-        for i in range(len(self.declaration.params)):
+        for i in range(len(self.expr.params)):
             environment.define(
-                self.declaration.params[i].lexeme, arguments[i])
+                self.expr.params[i].lexeme, arguments[i])
         try:
-            interpreter.execute_block(self.declaration.body, environment)
+            interpreter.execute_block(self.expr.body, environment)
         except Return as return_value:
             if self.is_initializer:
                 return self.closure.get_at(0, "this")
@@ -45,7 +55,10 @@ class Function(Callable):
     def bind(self, instance):
         environment: Environment = Environment(self.closure)
         environment.define("this", instance)
-        return Function(self.declaration, environment, self.is_initializer)
+        return Function(name=self.name,
+                        expr=self.expr,
+                        closure=environment,
+                        is_initializer=self.is_initializer)
 
     def __str__(self):
-        return "<fun " + self.declaration.name.lexeme + ">"
+        return f"<fun {self.name.lexeme}>" if self.name else "<lambda>"

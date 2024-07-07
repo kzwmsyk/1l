@@ -15,6 +15,7 @@ keywords = {
     "fun": TokenType.FUN,
     "fn": TokenType.FUN,
     "if": TokenType.IF,
+    "lambda": TokenType.LAMBDA,
     "method": TokenType.METHOD,
     "mthd": TokenType.METHOD,
     "nil": TokenType.NIL,
@@ -78,7 +79,8 @@ class Scanner:
                 self.add_token(TokenType.QUESTION)
             case ":":
                 self.add_token(TokenType.COLON)
-
+            case "λ" | "^":
+                self.add_token(TokenType.LAMBDA)
             case "!":
                 self.add_token(TokenType.BANG_EQUAL
                                if self.match("=")

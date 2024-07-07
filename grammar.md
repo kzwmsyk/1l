@@ -65,16 +65,19 @@ factor         ::= unary ( ( "/" | "//" | "*" | "%" ) unary )* ;
 unary          ::= ( "!" | "not" | "-" ) unary | call ;
 call           ::= primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 primary        ::= "true" | "false" | "nil" | "this"
-               | NUMBER | STRING | IDENTIFIER | "(" expression ")"
-               | "super" "." IDENTIFIER ;
+                | lambda
+                | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                | "super" "." IDENTIFIER ;
 ```
 
 ## Unity
 
 ```
-function       ::= IDENTIFIER "(" parameters? ")" block ;
+function       ::= IDENTIFIER function_body ;
+function_body  ::= "(" parameters? ")" block
 parameters     ::= IDENTIFIER ( "," IDENTIFIER )* ;
 arguments      ::= expression ( "," expression )* ;
+lambda         ::= ("λ" | "^" | "lambda") function_body ;
 ```
 
 ## Lexical

@@ -1,6 +1,5 @@
 from oneliner.token import Token
-from oneliner.expr import VariableExpr
-from oneliner.expr import Expr
+from oneliner.expr import Expr, VariableExpr, FunctionExpr
 
 
 class Stmt:
@@ -36,12 +35,10 @@ class ExpressionStmt(Stmt):
 class FunctionStmt(Stmt):
     def __init__(self,
                  name: Token,
-                 params: list[Token],
-                 body: list[Stmt]):
+                 function: FunctionExpr):
 
         self.name = name
-        self.params = params
-        self.body = body
+        self.function = function
 
     def accept(self, visitor):
         return visitor.visit_function_stmt(self)

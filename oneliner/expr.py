@@ -51,6 +51,18 @@ class CallExpr(Expr):
         return visitor.visit_call_expr(self)
 
 
+class FunctionExpr(Expr):
+    def __init__(self,
+                 params: list[Token],
+                 body: list):
+
+        self.params = params
+        self.body = body
+
+    def accept(self, visitor):
+        return visitor.visit_function_expr(self)
+
+
 class GetExpr(Expr):
     def __init__(self,
                  object: Expr,

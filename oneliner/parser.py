@@ -1,7 +1,7 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, SetExpr, ThisExpr, UnaryExpr, \
     LiteralExpr,  GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, \
-    LogicalExpr, CallExpr, GetExpr, SuperExpr
+    LogicalExpr, CallExpr, GetExpr, SuperExpr, FunctionExpr
 from oneliner.stmt import ClassStmt, Stmt, PrintStmt, ExpressionStmt, \
     VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
@@ -71,7 +71,9 @@ class Parser:
 
     def function(self, kind: str) -> FunctionStmt:
         name = self.consume(TokenType.IDENTIFIER, "Expect " + kind + " name.")
+        return FunctionStmt(name, self.function_body(kind))
 
+    def function_body(self, kind: str) -> list[Stmt]:
         self.consume(TokenType.LEFT_PAREN,
                      "Expect '(' after " + kind + " name.")
 
@@ -93,7 +95,7 @@ class Parser:
         self.consume(TokenType.LEFT_BRACE,
                      "Expect '{' before " + kind + " body.")
         body: list[Stmt] = self.block_statement()
-        return FunctionStmt(name, parameters, body)
+        return FunctionExpr(parameters, body)
 
     def statement(self) -> Stmt:
         if self.match(TokenType.PRINT):
@@ -400,6 +402,10 @@ class Parser:
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return GroupingExpr(expr)
+
+        if self.check(TokenType.LAMBDA):
+            self.advance()
+            return self.function_body("function")
 
         raise self.error(self.peek(), "Expect expression")
 

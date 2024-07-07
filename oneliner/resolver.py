@@ -1,7 +1,8 @@
 from oneliner.error import ErrorReporter
 from oneliner.token import Token
 from oneliner.interpreter import Interpreter
-from oneliner.expr import AssignExpr, BinaryExpr, Expr, SetExpr, TernaryExpr, \
+from oneliner.expr import AssignExpr, BinaryExpr, Expr, FunctionExpr, \
+    SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
     UnaryExpr, GetExpr, ThisExpr, SuperExpr
 from oneliner.stmt import BlockStmt, IfStmt, PrintStmt, Stmt, VarStmt, \
@@ -80,7 +81,7 @@ class Resolver():
             function_type = FunctionType.METHOD
             if method.name.lexeme == "init":
                 function_type = FunctionType.INITIALIZER
-            self.resolve_function(method, function_type)
+            self.resolve_function(method.function, function_type)
 
         self.end_scope()
 
@@ -141,10 +142,10 @@ class Resolver():
     def visit_function_stmt(self, stmt: FunctionStmt) -> None:
         self.declare(stmt.name)
         self.define(stmt.name)
-        self.resolve_function(stmt, FunctionType.FUNCTION)
+        self.resolve_function(stmt.function, FunctionType.FUNCTION)
 
     def resolve_function(self,
-                         function: FunctionStmt,
+                         function: FunctionExpr,
                          type: FunctionType) -> None:
         enclosing_function = self.current_function
         self.current_function = type
@@ -201,6 +202,9 @@ class Resolver():
         self.resolve(expr.callee)
         for arg in expr.arguments:
             self.resolve(arg)
+
+    def visit_function_expr(self, expr: FunctionExpr) -> None:
+        self.resolve_function(expr, FunctionType.FUNCTION)
 
     def visit_get_expr(self, expr: GetExpr) -> None:
         self.resolve(expr.object)

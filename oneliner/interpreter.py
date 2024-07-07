@@ -2,7 +2,7 @@ from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
     BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
-    LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr
+    LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr
 from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
@@ -55,7 +55,9 @@ class Interpreter:
         self.evaluate(stmt.expression)
 
     def visit_function_stmt(self, stmt: FunctionStmt) -> None:
-        function = Function(stmt, self.environment, is_initializer=False)
+        function = Function(stmt=stmt,
+                            closure=self.environment,
+                            is_initializer=False)
         self.environment.define(stmt.name.lexeme, function)
 
     def visit_var_stmt(self, stmt: VarStmt) -> None:
@@ -77,6 +79,11 @@ class Interpreter:
         finally:
             self.environment = previous
 
+    def visit_function_expr(self, expr: FunctionExpr) -> None:
+        return Function(expr=expr,
+                        closure=self.environment,
+                        is_initializer=False)
+
     def visit_class_stmt(self, stmt: ClassStmt):
         superclass = None
         if stmt.superclass is not None:
@@ -92,8 +99,10 @@ class Interpreter:
 
         methods = {}
         for method in stmt.methods:
-            function = Function(method, self.environment,
-                                is_initializer=method.name.lexeme == "init")
+            function = Function(
+                stmt=method,
+                closure=self.environment,
+                is_initializer=method.name.lexeme == "init")
             methods[method.name.lexeme] = function
 
         klass = Klass(stmt.name, superclass, methods)

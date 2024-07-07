@@ -25,6 +25,8 @@ def main(args):
                        ("paren", "Token"),
                        ("arguments", "list[Expr]")
                    ],
+                   "Function": [("params", "list[Token]"),
+                                ("body", "list")],  # list[Expr]
                    "Get": [("object", "Expr"), ("name", "Token")],
                    "Grouping": [("expression", "Expr")],
                    "Literal": [("value", "object")],
@@ -45,14 +47,13 @@ def main(args):
                "Stmt",
                """
                from oneliner.token import Token
-               from oneliner.expr import VariableExpr
-               from oneliner.expr import Expr
+               from oneliner.expr import Expr, VariableExpr, FunctionExpr
                """,
                {
                    "Block": [("statements", "list[Stmt]")],
                    "Expression": [("expression", "Expr")],
-                   "Function": [("name", "Token"), ("params", "list[Token]"),
-                                ("body", "list[Stmt]")],
+                   "Function": [("name", "Token"),
+                                ("function", "FunctionExpr")],
                    "Class": [("name", "Token"), ("superclass", "VariableExpr"),
                              ("methods", "list[FunctionStmt]")],
                    "If": [("condition", "Expr"), ("then_branch", "Stmt"),

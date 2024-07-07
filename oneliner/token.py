@@ -20,12 +20,14 @@ class TokenType(Enum):
     QUESTION = auto()
     COLON = auto()
 
-    HASH = auto()
-    PERCENT = auto()
-    PIPE = auto()
-    DOUBLE_PIPE = auto()
-    AMPERSAND = auto()
-    DOUBLE_AMPERSAND = auto()
+    HASH = auto()   # #
+    PERCENT = auto()   # %
+    PIPE = auto()   # |
+    DOUBLE_PIPE = auto()   # ||
+    AMPERSAND = auto()   # &
+    DOUBLE_AMPERSAND = auto()   # &&
+
+    LAMBDA = auto()   # λ ^
 
     # TWO Character Token
     BANG = auto()
