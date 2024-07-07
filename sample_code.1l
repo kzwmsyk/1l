@@ -34,26 +34,26 @@ p c2();
 p c1();
 
 class Animal {
-    init() {
+    method init() {
         this.age = 0;
     }
-    die() {
+    method die() {
         p "dead at " + this.age + " years old";
     }
-    live_a_year() {
+    method live_a_year() {
         this.age = this.age + 1;
     }
 }
 
 class Human < Animal {
-    init(name) {
+    mthd init(name) {
         super.init();
         this.name = name;
     }
-    die() {
+    mthd die() {
         p this.name + " is dead at " + this.age + " years old";
     }
-    die_a_dogs_death() {
+    mthd die_a_dogs_death() {
         super.die();
     }
 }

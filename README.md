@@ -20,5 +20,6 @@
   - `f`: `false`
   - `p`: `print`
   - `v`: `var`
+- メソッド定義の先頭に `method` `m` が必要
 
 [文法](./grammar.md)

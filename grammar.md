@@ -15,7 +15,7 @@ declaration    ::= classDecl
                | statement ;
 
 classDecl      ::= "class" IDENTIFIER ( "<" IDENTIFIER )?
-                 "{" function* "}" ;
+                 "{" ("method" | "mthd") function* "}" ;
 funDecl        ::= ("fun" | "fn") function ;
 varDecl        ::= ("var" | "v") IDENTIFIER ( "=" expression )? ";" ;
 ```

@@ -6,6 +6,7 @@ from oneliner.error import ErrorReporter
 keywords = {
     "and": TokenType.AND,
     "class": TokenType.CLASS,
+    "cl": TokenType.CLASS,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "f": TokenType.FALSE,
@@ -13,6 +14,8 @@ keywords = {
     "fun": TokenType.FUN,
     "fn": TokenType.FUN,
     "if": TokenType.IF,
+    "method": TokenType.METHOD,
+    "mthd": TokenType.METHOD,
     "nil": TokenType.NIL,
     "or": TokenType.OR,
     "p": TokenType.PRINT,

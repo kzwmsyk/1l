@@ -51,6 +51,7 @@ class TokenType(Enum):
     FUN = auto()
     FOR = auto()
     IF = auto()
+    METHOD = auto()
     NIL = auto()
     NOT = auto()
     OR = auto()
