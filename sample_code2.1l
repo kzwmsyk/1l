@@ -4,6 +4,8 @@
 # true: t
 # false: f
 # print: p
+# class : cls
+# method : mthd
 
 
 # ブロックの最後の式文、print文、return文はセミコロンを省略可能
