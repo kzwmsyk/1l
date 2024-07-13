@@ -8,7 +8,7 @@ from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
 from oneliner.function import Function, Callable
-from oneliner.native import NativeFunction, export_functions
+from oneliner.builtin import NativeFunction, export_functions
 from oneliner.utll import stringify, is_truthy
 
 import logging
