@@ -13,3 +13,15 @@ def stringify(value):
         return str(value).lower()
     else:
         return str(value)
+
+
+def is_truthy(object):
+    if object is None:
+        return False
+    if isinstance(object, bool):
+        return object
+    if isinstance(object, float):
+        return object != 0
+    if isinstance(object, int):
+        return object != 0
+    return True

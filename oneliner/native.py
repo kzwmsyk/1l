@@ -1,6 +1,10 @@
 from oneliner.function import Callable
 from time import time
-from oneliner.utll import camel_to_snake, stringify
+from oneliner.utll import camel_to_snake, stringify, is_truthy
+
+
+def export_functions():
+    return [Clock(), Print(), Str(), Float(), Int(), Bool(), Size()]
 
 
 class NativeFunction(Callable):
@@ -38,9 +42,41 @@ class Print(NativeFunction):
         return ["p"]
 
 
-class List(NativeClass):
-    pass
+class Str(NativeFunction):
+    def arity(self):
+        return 1
+
+    def call(self, interpreter, arguments: list):
+        return stringify(arguments[0])
 
 
-class Map(NativeClass):
-    pass
+class Float(NativeFunction):
+    def arity(self):
+        return 1
+
+    def call(self, interpreter, arguments: list):
+        return float(arguments[0])
+
+
+class Int(NativeFunction):
+    def arity(self):
+        return 1
+
+    def call(self, interpreter, arguments: list):
+        return int(arguments[0])
+
+
+class Bool(NativeFunction):
+    def arity(self) -> Int:
+        return 1
+
+    def call(self, interpreter, arguments: list):
+        return is_truthy(arguments[0])
+
+
+class Size(NativeFunction):
+    def arity(self) -> Int:
+        return 1
+
+    def call(self, interpreter, arguments: list):
+        return len(arguments[0])

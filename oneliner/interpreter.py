@@ -8,9 +8,8 @@ from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
 from oneliner.function import Function, Callable
-from oneliner.native import NativeClass, NativeFunction, \
-    Clock, Print
-from oneliner.utll import stringify
+from oneliner.native import NativeFunction, export_functions
+from oneliner.utll import stringify, is_truthy
 
 import logging
 logging.basicConfig(
@@ -27,13 +26,10 @@ class Interpreter:
         self.environment = Interpreter.globals
         self.locals = {}
         self.error_reporter = error_reporter
-        self.register_natives(Clock(),
-                              Print())
+        self.register_natives(export_functions())
 
-    def register_natives(self, *args):
-        for native in args:
-            assert isinstance(native, NativeFunction)\
-                or isinstance(native, NativeClass)
+    def register_natives(self, natives: list[NativeFunction]):
+        for native in natives:
             self.globals.define(native.name(), native)
 
             for alias in native.alias():
@@ -121,13 +117,13 @@ class Interpreter:
         self.environment.assign(stmt.name, klass)
 
     def visit_if_stmt(self, stmt: IfStmt) -> None:
-        if self.is_truthy(self.evaluate(stmt.condition)):
+        if is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.then_branch)
         elif stmt.else_branch is not None:
             self.execute(stmt.else_branch)
 
     def visit_while_stmt(self, stmt: WhileStmt) -> None:
-        while self.is_truthy(self.evaluate(stmt.condition)):
+        while is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.body)
 
     def visit_assign_expr(self, expr: AssignExpr):
@@ -154,7 +150,7 @@ class Interpreter:
                 self.check_numeric_operand(expr.operator, operand)
                 return - operand
             case TokenType.NOT | TokenType.BANG:
-                return not self.is_truthy(operand)
+                return not is_truthy(operand)
             case _:
                 raise InterpretError(expr.operator, "Unreachable")
 
@@ -171,7 +167,7 @@ class Interpreter:
 
     def visit_ternary_expr(self, expr: TernaryExpr):
         condition = self.evaluate(expr.condition)
-        if self.is_truthy(condition):
+        if is_truthy(condition):
             return self.evaluate(expr.then_expr)
         else:
             return self.evaluate(expr.else_expr)
@@ -181,10 +177,10 @@ class Interpreter:
 
         match expr.operator.type:
             case TokenType.OR | TokenType.DOUBLE_PIPE:
-                if self.is_truthy(left):
+                if is_truthy(left):
                     return left
             case TokenType.AND | TokenType.DOUBLE_AMPERSAND:
-                if not self.is_truthy(left):
+                if not is_truthy(left):
                     return left
 
         return self.evaluate(expr.right)
@@ -241,17 +237,6 @@ class Interpreter:
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)
-
-    def is_truthy(self, object):
-        if object is None:
-            return False
-        if isinstance(object, bool):
-            return object
-        if isinstance(object, float):
-            return object != 0
-        if isinstance(object, int):
-            return object != 0
-        return True
 
     def visit_variable_expr(self, expr: VariableExpr):
         return self.look_up_variable(expr.name, expr)
