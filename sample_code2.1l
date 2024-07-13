@@ -3,41 +3,40 @@
 # fun: fn
 # true: t
 # false: f
-# print: p
 # class : cls
 # method : mthd
 # lambda : ^ λ
 
 # ブロックの最後の式文、print文、return文はセミコロンを省略可能
 v a = 1;
-fn b(i) { p a + i }
+fn b(i) { p(a + i) }
 b(15);
 
 fn ternary(bool) {return bool ? "TRUE" : "FALSE"}
-p ternary(t);
-p ternary(f);
+p(ternary(t));
+p(ternary(f));
 
 # do while実装済み
 
 var a = 3;
 do {
-    p a;
+    p(a);
     a = a - 1;
 } while (a < 0)
 
-p a;
+p(a);
 
 # 無名関数はλ lambda ^で書ける。
 
 var adder = λ(x){ return x + 1 };
-p adder(1);
+p(adder(1));
 
 cls Pair{mthd init(x,y){this.x = x; this.y = y}}
 v divmod = λ(x, y){ return Pair(x//y, x%y) };
 v pair = divmod(10, 3);
-p pair.x;
-p pair.y;
+p(pair.x);
+p(pair.y);
 
 
-# プログラムの最後の式文、print文、return文もセミコロンを省略可能
-p 1+1
+# プログラムの最後の式文、return文もセミコロンを省略可能
+p(1+1)

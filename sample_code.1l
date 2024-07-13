@@ -1,13 +1,13 @@
 # コメントは # から行末まで。
 
 # // % は整数の割り算の商と剰余
-p 13 // 5; # 2
-p 13 % 5;  # 3
+p(13 // 5); # 2;
+p(13 % 5);  # 3;
 
 fun fib(n) {
     return n < 2 ? n : fib(n - 1) + fib(n - 2);
 }
-p fib(5);
+p(fib(5));
 
 fun make_counter() {
     var i = 0;
@@ -24,21 +24,21 @@ var c2 = make_counter();
 for(var i = 0; i < 10; i = i+1) {
     c1();
 }
-p c1();
+p(c1());
 
 for(var i = 0; i < 5; i = i+1) {
     c2();
 }
-p c2();
+p(c2());
 
-p c1();
+p(c1());
 
 class Animal {
     method init() {
         this.age = 0;
     }
     method die() {
-        p "dead at " + this.age + " years old";
+        p("dead at " + this.age + " years old");
     }
     method live_a_year() {
         this.age = this.age + 1;
@@ -51,7 +51,7 @@ class Human < Animal {
         this.name = name;
     }
     mthd die() {
-        p this.name + " is dead at " + this.age + " years old";
+        p(this.name + " is dead at " + this.age + " years old");
     }
     mthd die_a_dogs_death() {
         super.die();
