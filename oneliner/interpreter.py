@@ -8,6 +8,15 @@ from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
 from oneliner.function import Function, Callable
+from oneliner.native import NativeClass, NativeFunction, \
+    Clock, List, Map, PPrint
+
+import logging
+# ロガーの設定
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# ロガーの取得
+logger = logging.getLogger(__name__)
 
 
 class Interpreter:
@@ -18,6 +27,14 @@ class Interpreter:
         self.environment = Interpreter.globals
         self.locals = {}
         self.error_reporter = error_reporter
+        self.register_natives(Clock(),
+                              PPrint())
+
+    def register_natives(self, *args):
+        for native in args:
+            assert isinstance(native, NativeFunction)\
+                or isinstance(native, NativeClass)
+            self.globals.define(native.name(), native)
 
     def interpret(self, statements: list[Stmt]):
         try:
