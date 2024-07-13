@@ -20,8 +20,6 @@ keywords = {
     "mthd": TokenType.METHOD,
     "nil": TokenType.NIL,
     "or": TokenType.OR,
-    "p": TokenType.PRINT,
-    "print": TokenType.PRINT,
     "not":  TokenType.NOT,
     "return": TokenType.RETURN,
     "super": TokenType.SUPER,

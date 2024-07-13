@@ -5,7 +5,7 @@ from oneliner.expr import AssignExpr, BinaryExpr, Expr, FunctionExpr, \
     SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
     UnaryExpr, GetExpr, ThisExpr, SuperExpr
-from oneliner.stmt import BlockStmt, IfStmt, PrintStmt, Stmt, VarStmt, \
+from oneliner.stmt import BlockStmt, IfStmt, Stmt, VarStmt, \
     FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
 from enum import Enum, auto
 
@@ -167,9 +167,6 @@ class Resolver():
         self.resolve(stmt.then_branch)
         if stmt.else_branch is not None:
             self.resolve(stmt.else_branch)
-
-    def visit_print_stmt(self, stmt: PrintStmt) -> None:
-        self.resolve(stmt.expression)
 
     def visit_return_stmt(self, stmt: ReturnStmt) -> None:
         if self.current_function == FunctionType.NONE:

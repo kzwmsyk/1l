@@ -2,7 +2,7 @@ from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, SetExpr, ThisExpr, UnaryExpr, \
     LiteralExpr,  GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, \
     LogicalExpr, CallExpr, GetExpr, SuperExpr, FunctionExpr
-from oneliner.stmt import ClassStmt, Stmt, PrintStmt, ExpressionStmt, \
+from oneliner.stmt import ClassStmt, Stmt, ExpressionStmt, \
     VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
 
@@ -98,9 +98,6 @@ class Parser:
         return FunctionExpr(parameters, body)
 
     def statement(self) -> Stmt:
-        if self.match(TokenType.PRINT):
-            return self.print_statement()
-
         if self.match(TokenType.RETURN):
             return self.return_statement()
 
@@ -121,11 +118,6 @@ class Parser:
 
         # TODO: ほかのぶん
         return self.expression_statement()
-
-    def print_statement(self) -> Stmt:
-        expr = self.expression()
-        self.consume_semicolon_or_ignore()
-        return PrintStmt(expr)
 
     def return_statement(self) -> Stmt:
         keyword = self.previous()

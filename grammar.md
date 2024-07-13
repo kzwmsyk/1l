@@ -25,7 +25,6 @@ varDecl        ::= ("var" | "v") IDENTIFIER ( "=" expression )? ";" ;
 statement      ::= exprStmt
                | forStmt
                | ifStmt
-               | printStmt
                | returnStmt
                | whileStmt
                | block ;
@@ -36,7 +35,6 @@ forStmt        ::= "for" "(" ( varDecl | exprStmt | ";" )
                            expression? ")" statement ;
 ifStmt         ::= "if" "(" expression ")" statement
                  ( "else" statement )? ;
-printStmt      ::= ("print" | "p") expression ";" ;
 returnStmt     ::= "return" expression? ";" ;
 whileStmt      ::= "while" "(" expression ")" statement ;
 block          ::= "{" declaration* "}" ;

@@ -21,11 +21,15 @@
   - `fn`: `fun`
   - `t`: `true`
   - `f`: `false`
-  - `p`: `print`
-  - `v`: `var`
+    - `v`: `var`
   - `cls`: `class`
   - `mthd`: `method`
   - `λ`: `lambda`, `^`
+- printは関数である。
+```
+print(1) # OK
+print 1 # NG
+```
 
 
 [文法](./grammar.md)

@@ -3,19 +3,19 @@ from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
     BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
     LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt, VarStmt, \
+from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
 from oneliner.function import Function, Callable
 from oneliner.native import NativeClass, NativeFunction, \
-    Clock, List, Map, PPrint
+    Clock, Print
+from oneliner.utll import stringify
 
 import logging
-# ロガーの設定
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# ロガーの取得
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -28,13 +28,16 @@ class Interpreter:
         self.locals = {}
         self.error_reporter = error_reporter
         self.register_natives(Clock(),
-                              PPrint())
+                              Print())
 
     def register_natives(self, *args):
         for native in args:
             assert isinstance(native, NativeFunction)\
                 or isinstance(native, NativeClass)
             self.globals.define(native.name(), native)
+
+            for alias in native.alias():
+                self.globals.define(alias, native)
 
     def interpret(self, statements: list[Stmt]):
         try:
@@ -46,20 +49,8 @@ class Interpreter:
     def execute(self, stmt: Stmt):
         stmt.accept(self)
 
-    def stringify(self, value):
-        if value is None:
-            return "nil"
-        elif isinstance(value, bool):
-            return str(value).lower()
-        else:
-            return str(value)
-
     def resolve(self, expr: Expr, depth: int):
         self.locals[expr] = depth
-
-    def visit_print_stmt(self, stmt: PrintStmt) -> None:
-        value = self.evaluate(stmt.expression)
-        print(self.stringify(value))
 
     def visit_return_stmt(self, stmt: ReturnStmt) -> None:
         value = None
@@ -207,7 +198,7 @@ class Interpreter:
                 if self.is_numeric(left) and self.is_numeric(right):
                     return left + right
                 else:
-                    return self.stringify(left) + self.stringify(right)
+                    return stringify(left) + stringify(right)
             case TokenType.MINUS:
                 self.check_numeric_operands(expr.operator, left, right)
                 return left - right

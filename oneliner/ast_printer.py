@@ -1,7 +1,7 @@
 
 from oneliner.expr import Expr, LiteralExpr, UnaryExpr, BinaryExpr, \
     GroupingExpr, TernaryExpr
-from oneliner.stmt import Stmt, PrintStmt, ExpressionStmt
+from oneliner.stmt import Stmt, ExpressionStmt
 
 
 class AstPrinter:
@@ -13,9 +13,6 @@ class AstPrinter:
     def print_statements(self, statements: list[Stmt]):
         for statement in statements:
             print(self.print(statement))
-
-    def visit_print_stmt(self, stmt: PrintStmt):
-        return self.parenthesize("print", stmt.expression)
 
     def visit_expression_stmt(self, stmt: ExpressionStmt):
         return self.print(";", stmt.expression)

@@ -72,16 +72,6 @@ class IfStmt(Stmt):
         return visitor.visit_if_stmt(self)
 
 
-class PrintStmt(Stmt):
-    def __init__(self,
-                 expression: Expr):
-
-        self.expression = expression
-
-    def accept(self, visitor):
-        return visitor.visit_print_stmt(self)
-
-
 class ReturnStmt(Stmt):
     def __init__(self,
                  keyword: Token,
