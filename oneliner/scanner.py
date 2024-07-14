@@ -61,6 +61,10 @@ class Scanner:
                 self.add_token(TokenType.LEFT_BRACE)
             case "}":
                 self.add_token(TokenType.RIGHT_BRACE)
+            case "[":
+                self.add_token(TokenType.LEFT_BRACKET)
+            case "]":
+                self.add_token(TokenType.RIGHT_BRACKET)
             case ",":
                 self.add_token(TokenType.COMMA)
             case ".":
@@ -105,11 +109,25 @@ class Scanner:
                                if self.match("|")
                                else TokenType.PIPE)
             case "%":
-                self.add_token(TokenType.PERCENT)
+                self.add_token(TokenType.PERCENT_LEFT_BRACE
+                               if self.match("{")
+                               else TokenType.PERCENT)
             case "#":
                 # コメント
-                while self.peek() != "\n" and not self.is_at_end():
-                    self.advance()
+                # #の直後が開き括弧({[の場合、それぞれ)}]までがコメントとして扱われる
+                brackets = {"{": "}", "[": "]", "(": ")"}
+                peeked = self.peek()
+                if peeked in brackets:
+                    closer = brackets[peeked]
+                    while self.peek() != closer and not self.is_at_end():
+                        if self.peek() == "\n":
+                            self.line += 1
+                        self.advance()
+                    self.advance()  # 閉じ括弧を消費
+                else:
+                    while self.peek() != "\n" and not self.is_at_end():
+                        self.advance()
+
             case "/":
                 self.add_token(TokenType.DOUBLE_SLASH
                                if self.match("/")

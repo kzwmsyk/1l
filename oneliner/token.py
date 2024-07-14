@@ -22,6 +22,7 @@ class TokenType(Enum):
 
     HASH = auto()   # #
     PERCENT = auto()   # %
+    PERCENT_LEFT_BRACE = auto()  # %{
     PIPE = auto()   # |
     DOUBLE_PIPE = auto()   # ||
     AMPERSAND = auto()   # &
