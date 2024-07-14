@@ -10,7 +10,6 @@ from oneliner.environment import Environment
 from oneliner.function import Function, Callable, Partial
 from oneliner.builtin import NativeFunction, export_functions
 from oneliner.utll import stringify, is_truthy
-from typing import Self
 
 import logging
 logging.basicConfig(
@@ -264,7 +263,6 @@ class Interpreter:
         return callee.call(self, arguments)
 
     def visit_get_expr(self, expr: GetExpr):
-        "foo.bar"
 
         invocant = self.evaluate(expr.object)
         property = expr.name
