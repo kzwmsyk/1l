@@ -62,3 +62,17 @@ class Function(Callable):
 
     def __str__(self):
         return f"<fun {self.name.lexeme}>" if self.name else "<lambda>"
+
+
+class Partial(Callable):
+    "Callableに対して、第一引数を部分適用した新たなCallableを表す"
+
+    def __init__(self, function: Callable, arg1):
+        self.function = function
+        self.arg1 = arg1
+
+    def arity(self):
+        return self.function.arity() - 1
+
+    def call(self, interpreter, arguments: list):
+        return self.function.call(interpreter, [self.arg1] + arguments)

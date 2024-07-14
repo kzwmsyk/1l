@@ -80,3 +80,6 @@ class Size(NativeFunction):
 
     def call(self, interpreter, arguments: list):
         return len(arguments[0])
+
+    def alias(self):
+        return ["length", "len"]

@@ -2,9 +2,15 @@
 
 [CRAFTING INTERPRETERS](https://craftinginterpreters.com)の[Lox](https://craftinginterpreters.com/the-lox-language.html)のインタプリタ版を、書籍のJava実装を元にPythonで実装して少し手を入れたスクリプト言語です。
 
+## Loxからの差分
 1行でのプログラムが書きやすくなるように、以下の変更を加えています。
 
-- ブロックおよびプログラムの最後の式文、print文、return文はセミコロンを省略可能
+- print / pは関数である。
+```
+print(1) # OK
+print 1 # NG
+```
+- ブロックおよびプログラムの最後の式文、return文はセミコロンを省略可能
 - 三項演算子 `x ? a : b` を追加
 - 文字列リテラルは`"abc"` と `'abc'` の2種類
 - メソッド定義の先頭に `method` `mthd` が必要
@@ -25,11 +31,7 @@
   - `cls`: `class`
   - `mthd`: `method`
   - `λ`: `lambda`, `^`
-- printは関数である。
-```
-print(1) # OK
-print 1 # NG
-```
+- ドット記法に続く関数呼び出し `foo.bar(x,y,z)` は、fooがオブジェクトインスタンスの場合はメソッド呼び出しだが、それ以外のプリミティブの場合、 関数呼び出し `bar(foo, x, y, z)` の構文糖衣として扱われる。
 
 
 [文法](./grammar.md)

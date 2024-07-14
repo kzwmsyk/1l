@@ -7,9 +7,10 @@ from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
-from oneliner.function import Function, Callable
+from oneliner.function import Function, Callable, Partial
 from oneliner.builtin import NativeFunction, export_functions
 from oneliner.utll import stringify, is_truthy
+from typing import Self
 
 import logging
 logging.basicConfig(
@@ -263,12 +264,26 @@ class Interpreter:
         return callee.call(self, arguments)
 
     def visit_get_expr(self, expr: GetExpr):
-        object = self.evaluate(expr.object)
-        if isinstance(object, Instance):
-            return object.get(expr.name)
+        "foo.bar"
 
-        raise InterpretError(expr.name,
-                             "Only instances have properties.")
+        invocant = self.evaluate(expr.object)
+        property = expr.name
+
+        if isinstance(invocant, Instance):
+            return invocant.get(property)
+
+        # syntax sugar: obj.foo(x,y,z) == foo(obj, x,y,z)
+        # resolve dynamic
+        function = self.environment.get(property)
+        if function is not None and isinstance(function, Callable):
+            if function.arity() < 1:
+                raise InterpretError(
+                    property,
+                    "Callable must have at least 1 argument")
+            return Partial(function, invocant)
+
+        raise InterpretError(property,
+                             "Neither instance property nor callable")
 
     def visit_set_expr(self, expr: SetExpr):
         object = self.evaluate(expr.object)
