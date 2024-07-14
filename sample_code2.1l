@@ -37,6 +37,28 @@ v pair = divmod(10, 3);
 p(pair.x);
 p(pair.y);
 
+# bool int float string list map が基本データ型である。
+
+var a = t;
+var b = f;
+var c = 1;
+var d = 1.1;
+var e = "abc";
+var list = [1,2,3];
+var map = %{"a":1, "b":2, "c":3};
+
+# ドット記法に続く関数呼び出し `foo.bar(x,y,z)` は、
+# fooがオブジェクトインスタンスの場合はメソッド呼び出しだが、
+# それ以外のプリミティブの場合、 関数呼び出し `bar(foo, x, y, z)` の構文糖衣として扱われる。
+
+p("abc");
+"abc".p();
+
+int("1");
+"1".int();
+
+size([1,2,3]).p();
+[1,2,3].size().p();
 
 # プログラムの最後の式文、return文もセミコロンを省略可能
 p(1+1)

@@ -48,7 +48,7 @@ semicolons of varDecl, exprStmt, printStmt, retrunStmt are omittable at the end 
 ```
 expression     ::= assignment ;
 
-assignment     ::= ( call "." )? IDENTIFIER "=" assignment
+assignment     ::= ( call "." )? IDENTIFIER (index)? "=" assignment
                | ternary ;
 
 ternary        ::= logic_or ("?" expression ":" ternary )?;
@@ -61,11 +61,17 @@ term           ::= factor ( ( "-" | "+" ) factor )* ;
 factor         ::= unary ( ( "/" | "//" | "*" | "%" ) unary )* ;
 
 unary          ::= ( "!" | "not" | "-" ) unary | call ;
-call           ::= primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+call           ::= primary ( "(" arguments? ")" | "." IDENTIFIER | index)* ;
 primary        ::= "true" | "false" | "nil" | "this"
+                | list | map
                 | lambda
                 | NUMBER | STRING | IDENTIFIER | "(" expression ")"
                 | "super" "." IDENTIFIER ;
+index          ::= "[" expression "]" ;
+list           ::= "[" elements? "]" ;
+map            ::= "%{" pairs? "}" ;
+elements      ::= expression ( "," expression )* ;
+pairs          ::= expression ":" expression ( "," expression ":" expression )* ;
 ```
 
 ## Unity
