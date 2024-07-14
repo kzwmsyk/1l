@@ -4,7 +4,8 @@ from oneliner.interpreter import Interpreter
 from oneliner.expr import AssignExpr, BinaryExpr, Expr, FunctionExpr, \
     SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
-    UnaryExpr, GetExpr, ThisExpr, SuperExpr
+    UnaryExpr, GetExpr, ThisExpr, SuperExpr, ListExpr, MapExpr, \
+    IndexGetExpr, IndexSetExpr
 from oneliner.stmt import BlockStmt, IfStmt, Stmt, VarStmt, \
     FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
 from enum import Enum, auto
@@ -200,6 +201,15 @@ class Resolver():
         for arg in expr.arguments:
             self.resolve(arg)
 
+    def visit_index_get_expr(self, expr: IndexGetExpr) -> None:
+        self.resolve(expr.collection)
+        self.resolve(expr.index)
+
+    def visit_index_set_expr(self, expr: IndexSetExpr) -> None:
+        self.resolve(expr.collection)
+        self.resolve(expr.index)
+        self.resolve(expr.value)
+
     def visit_function_expr(self, expr: FunctionExpr) -> None:
         self.resolve_function(expr, FunctionType.FUNCTION)
 
@@ -230,6 +240,15 @@ class Resolver():
             return
 
         self.resolve_local(expr, expr.keyword)
+
+    def visit_list_expr(self, expr: ListExpr) -> None:
+        for element in expr.elements:
+            self.resolve(element)
+
+    def visit_map_expr(self, expr: MapExpr) -> None:
+        for (key, value) in expr.elements:
+            self.resolve(key)
+            self.resolve(value)
 
     def visit_super_expr(self, expr: SuperExpr):
         if self.current_class == ClassType.NONE:

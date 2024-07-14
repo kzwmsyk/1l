@@ -54,7 +54,7 @@ class CallExpr(Expr):
 class FunctionExpr(Expr):
     def __init__(self,
                  params: list[Token],
-                 body: list):
+                 body: list[Expr]):
 
         self.params = params
         self.body = body
@@ -179,3 +179,53 @@ class VariableExpr(Expr):
 
     def accept(self, visitor):
         return visitor.visit_variable_expr(self)
+
+
+class ListExpr(Expr):
+    def __init__(self,
+                 elements: list[Expr]):
+
+        self.elements = elements
+
+    def accept(self, visitor):
+        return visitor.visit_list_expr(self)
+
+
+class MapExpr(Expr):
+    def __init__(self,
+                 elements: list[(Expr, Expr)]):
+
+        self.elements = elements
+
+    def accept(self, visitor):
+        return visitor.visit_map_expr(self)
+
+
+class IndexGetExpr(Expr):
+    def __init__(self,
+                 collection: Expr,
+                 index: Expr,
+                 bracket: Token):
+
+        self.collection = collection
+        self.index = index
+        self.bracket = bracket
+
+    def accept(self, visitor):
+        return visitor.visit_index_get_expr(self)
+
+
+class IndexSetExpr(Expr):
+    def __init__(self,
+                 collection: Expr,
+                 index: Token,
+                 bracket: Token,
+                 value: Expr):
+
+        self.collection = collection
+        self.index = index
+        self.bracket = bracket
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visit_index_set_expr(self)

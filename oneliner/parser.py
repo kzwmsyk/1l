@@ -1,7 +1,8 @@
 from oneliner.token import Token, TokenType
 from oneliner.expr import Expr, BinaryExpr, SetExpr, ThisExpr, UnaryExpr, \
     LiteralExpr,  GroupingExpr, TernaryExpr, VariableExpr, AssignExpr, \
-    LogicalExpr, CallExpr, GetExpr, SuperExpr, FunctionExpr
+    LogicalExpr, CallExpr, GetExpr, SuperExpr, FunctionExpr, ListExpr, \
+    MapExpr, IndexGetExpr, IndexSetExpr
 from oneliner.stmt import ClassStmt, Stmt, ExpressionStmt, \
     VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt
 from oneliner.error import ParseError, ErrorReporter
@@ -236,6 +237,11 @@ class Parser:
             elif isinstance(expr, GetExpr):
                 get = expr
                 return SetExpr(get.object, get.name, value)
+            elif isinstance(expr, IndexGetExpr):
+                return IndexSetExpr(expr.collection,
+                                    expr.index,
+                                    expr.bracket,
+                                    value)
 
             self.error(equals, "Invalid assignment target.")
         return expr
@@ -344,6 +350,8 @@ class Parser:
                 name = self.consume(TokenType.IDENTIFIER,
                                     "Expect property name after '.'.")
                 expr = GetExpr(expr, name)
+            elif self.match(TokenType.LEFT_BRACKET):
+                expr = self.index_access(expr)
             else:
                 break
         return expr
@@ -365,6 +373,12 @@ class Parser:
         paren = self.consume(TokenType.RIGHT_PAREN,
                              "Expect ')' after arguments.")
         return CallExpr(callee, paren, arguments)
+
+    def index_access(self, collection: Expr) -> Expr:
+        index = self.expression()
+        bracket = self.consume(TokenType.RIGHT_BRACKET,
+                               "Expect ']' after index.")
+        return IndexGetExpr(collection, index, bracket)
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
@@ -395,11 +409,43 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return GroupingExpr(expr)
 
+        if self.match(TokenType.LEFT_BRACKET):
+            return self.list()
+
+        if self.match(TokenType.PERCENT_LEFT_BRACE):
+            return self.map()
+
         if self.check(TokenType.LAMBDA):
             self.advance()
             return self.function_body("function")
 
         raise self.error(self.peek(), "Expect expression")
+
+    def list(self) -> Expr:
+        elements: list[Expr] = []
+        if not self.check(TokenType.RIGHT_BRACKET):
+            while True:
+                elements.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        self.consume(TokenType.RIGHT_BRACKET, "Expect ']' after list.")
+        return ListExpr(elements)
+
+    def map(self) -> Expr:
+        elements: list[(Expr, Expr)] = []
+        if not self.check(TokenType.RIGHT_BRACE):
+            while True:
+                key = self.expression()
+                self.consume(TokenType.COLON, "Expect ':' after key.")
+                value = self.expression()
+                elements.append((key, value))
+
+                if not self.match(TokenType.COMMA):
+                    break
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after map.")
+        return MapExpr(elements)
 
     def consume(self, type: TokenType, message: str):
         if self.check(type):

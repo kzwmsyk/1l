@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import chevron
 import textwrap
+import re
 
 
 def main(args):
@@ -26,7 +27,7 @@ def main(args):
                        ("arguments", "list[Expr]")
                    ],
                    "Function": [("params", "list[Token]"),
-                                ("body", "list")],  # list[Expr]
+                                ("body", "list[Expr]")],
                    "Get": [("object", "Expr"), ("name", "Token")],
                    "Grouping": [("expression", "Expr")],
                    "Literal": [("value", "object")],
@@ -41,6 +42,15 @@ def main(args):
                    "This": [("keyword", "Token")],
                    "Unary": [("operator", "Token"), ("operand", "Expr")],
                    "Variable": [("name", "Token")],
+                   "List": [("elements", "list[Expr]")],
+                   "Map": [("elements", "list[(Expr, Expr)]")],
+                   "IndexGet": [("collection", "Expr"),
+                                ("index", "Expr"),
+                                ("bracket", "Token")],
+                   "IndexSet": [("collection", "Expr"),
+                                ("index", "Token"),
+                                ("bracket", "Token"),
+                                ("value", "Expr")],
                })
 
     define_ast(output_dir,
@@ -68,11 +78,11 @@ def define_ast(output_dir,
                base_name,
                imports: str,
                types: dict[str, list[tuple[str, str]]]):
-    path = Path(output_dir) / (base_name.lower() + ".py")
+    path = Path(output_dir) / (camel_to_snake(base_name) + ".py")
 
     type_list = [
         {"subclass_name": key,
-         "subclass_name_lc": key.lower(),
+         "subclass_name_lc": camel_to_snake(key),
          "fields": [
              {"name": name_type[0],
               "type": name_type[1]}
@@ -89,11 +99,16 @@ def define_ast(output_dir,
 
             writer.write(chevron.render(template, {
                 "base_name": base_name,
-                "base_name_lc": base_name.lower(),
+                "base_name_lc": camel_to_snake(base_name),
                 "imports": textwrap.dedent(imports).strip(),
                 "types": type_list,
 
             }))
+
+
+def camel_to_snake(camel):
+    s1 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', camel)
+    return s1.lower()
 
 
 if __name__ == "__main__":

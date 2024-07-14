@@ -2,7 +2,8 @@ from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
 from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
     BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
-    LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr
+    LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr, \
+    ListExpr, MapExpr, IndexGetExpr, IndexSetExpr
 from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
@@ -18,8 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class Interpreter:
-    # ExprVisitor, StmtVisitor
+class Interpreter:  # implements ExprVisitor, StmtVisitor
     globals = Environment()
 
     def __init__(self, error_reporter: ErrorReporter):
@@ -193,6 +193,10 @@ class Interpreter:
             case TokenType.PLUS:
                 if self.is_numeric(left) and self.is_numeric(right):
                     return left + right
+                elif isinstance(left, list) and isinstance(right, list):
+                    return left + right
+                elif isinstance(left, dict) and isinstance(right, dict):
+                    return {**left, **right}
                 else:
                     return stringify(left) + stringify(right)
             case TokenType.MINUS:
@@ -283,15 +287,35 @@ class Interpreter:
         raise InterpretError(property,
                              "Neither instance property nor callable")
 
+    def visit_index_get_expr(self, expr: IndexGetExpr):
+        collection = self.evaluate(expr.collection)
+        index = self.evaluate(expr.index)
+        return collection[index]
+
+    def visit_index_set_expr(self, expr: IndexSetExpr):
+        collection = self.evaluate(expr.collection)
+        index = self.evaluate(expr.index)
+        value = self.evaluate(expr.value)
+        collection[index] = value
+        return value
+
     def visit_set_expr(self, expr: SetExpr):
         object = self.evaluate(expr.object)
-        if not isinstance(object, Instance):
-            raise InterpretError(expr.name,
-                                 "Only instances have fields.")
 
-        value = self.evaluate(expr.value)
-        object.set(expr.name, value)
-        return value
+        match(object):
+            case list():
+                value = self.evaluate(expr.value)
+                object.set(expr.name, value)
+                return value
+            case dict():
+                pass
+            case Instance():
+                value = self.evaluate(expr.value)
+                object.set(expr.name, value)
+                return value
+            case _:
+                raise InterpretError(expr.name,
+                                     "Only instances have fields.")
 
     def visit_this_expr(self, expr: ThisExpr):
         return self.look_up_variable(expr.keyword, expr)
@@ -306,3 +330,11 @@ class Interpreter:
             raise InterpretError(expr.method,
                                  f"Undefined property '{expr.method.lexeme}'.")
         return method.bind(object)
+
+    def visit_list_expr(self, expr: ListExpr):
+        return [self.evaluate(element) for element in expr.elements]
+
+    def visit_map_expr(self, expr: MapExpr):
+        return {self.evaluate(key): self.evaluate(value)
+                for key, value
+                in expr.elements}
