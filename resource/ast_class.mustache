@@ -1,17 +1,12 @@
 {{imports}}
-
+from abc import ABC, abstractmethod
 
 class {{base_name}}:
-    # Visitor Interface
-    # class Visitor<R>:
-    #     R visit_foo_stmt(Foo stmt)
-    #     R visit_bar_expr(Bar expr)
-
-    def accept(visitor):
+    def accept(self, visitor):
         pass
+
+
 {{#types}}
-
-
 class {{subclass_name}}{{base_name}}({{base_name}}):
     def __init__(self,{{#fields}}
                  {{name}}: {{type}}{{^is_last}},{{/is_last}}{{/fields}}):
@@ -22,4 +17,15 @@ class {{subclass_name}}{{base_name}}({{base_name}}):
 
     def accept(self, visitor):
         return visitor.visit_{{subclass_name_lc}}_{{base_name_lc}}(self)
+
 {{/types}}
+
+class {{base_name}}Visitor(ABC):
+
+    {{#types}}
+    @abstractmethod
+    def visit_{{subclass_name_lc}}_{{base_name_lc}}(self, {{base_name_lc}}: {{subclass_name}}{{base_name}}):
+        pass
+
+    {{/types}}
+

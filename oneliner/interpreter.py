@@ -1,25 +1,25 @@
+import logging
+from oneliner.utll import stringify, is_truthy
+from oneliner.builtin import NativeFunction, export_functions
+from oneliner.function import Function, Callable, Partial
+from oneliner.environment import Environment
+from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.klass import Instance, Klass
 from oneliner.token import TokenType, Token
-from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
-    BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
+from oneliner.expr import Expr, ExprVisitor, LiteralExpr, GroupingExpr, \
+    SetExpr, BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
     LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr, \
     ListExpr, MapExpr, IndexGetExpr, IndexSetExpr
-from oneliner.stmt import Stmt, EmptyStmt, ExpressionStmt, VarStmt, \
-    BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
-from oneliner.error import InterpretError, ErrorReporter, Return
-from oneliner.environment import Environment
-from oneliner.function import Function, Callable, Partial
-from oneliner.builtin import NativeFunction, export_functions
-from oneliner.utll import stringify, is_truthy
+from oneliner.stmt import Stmt, StmtVisitor, EmptyStmt, ExpressionStmt, \
+    VarStmt, BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 
-import logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
-class Interpreter:  # implements ExprVisitor, StmtVisitor
+class Interpreter(ExprVisitor, StmtVisitor):
     globals = Environment()
 
     def __init__(self, error_reporter: ErrorReporter):

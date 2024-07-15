@@ -61,8 +61,8 @@ class Runner:
                 return
 
             if self.is_debug:
-                printer = AstPrinter(self)
-                print(printer.print(statements))
+                printer = AstPrinter()
+                printer.print(statements)
 
             resolver = Resolver(self.interpreter, self.error_reporter)
             resolver.resolve(statements)

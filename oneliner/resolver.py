@@ -1,12 +1,12 @@
 from oneliner.error import ErrorReporter
 from oneliner.token import Token
 from oneliner.interpreter import Interpreter
-from oneliner.expr import AssignExpr, BinaryExpr, Expr, FunctionExpr, \
-    SetExpr, TernaryExpr, \
+from oneliner.expr import ExprVisitor, AssignExpr, BinaryExpr, Expr, \
+    FunctionExpr, SetExpr, TernaryExpr, \
     VariableExpr, CallExpr, GroupingExpr, LiteralExpr, LogicalExpr, \
     UnaryExpr, GetExpr, ThisExpr, SuperExpr, ListExpr, MapExpr, \
     IndexGetExpr, IndexSetExpr
-from oneliner.stmt import BlockStmt, IfStmt, Stmt, VarStmt, \
+from oneliner.stmt import StmtVisitor, BlockStmt, IfStmt, Stmt, VarStmt, \
     FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt, \
     EmptyStmt
 from enum import Enum, auto
@@ -25,7 +25,7 @@ class ClassType(Enum):
     SUBCLASS = auto()
 
 
-class Resolver():
+class Resolver(StmtVisitor, ExprVisitor):
     def __init__(self,
                  interpreter: Interpreter,
                  error_reporter: ErrorReporter):

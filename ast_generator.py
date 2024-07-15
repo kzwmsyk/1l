@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
+
 import sys
 from pathlib import Path
 import chevron
 import textwrap
-import re
+from oneliner.utll import camel_to_snake
 
 
 def main(args):
@@ -96,8 +97,9 @@ def define_ast(output_dir,
         fields[-1]["is_last"] = True
 
     with open(path, "w", encoding="utf-8") as writer:
-        with open("ast_class.mustache", "r", encoding="utf-8") as template:
-
+        with open(
+            "resource/ast_class.mustache", "r", encoding="utf-8"
+        ) as template:
             writer.write(chevron.render(template, {
                 "base_name": base_name,
                 "base_name_lc": camel_to_snake(base_name),
@@ -105,11 +107,6 @@ def define_ast(output_dir,
                 "types": type_list,
 
             }))
-
-
-def camel_to_snake(camel):
-    s1 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', camel)
-    return s1.lower()
 
 
 if __name__ == "__main__":
