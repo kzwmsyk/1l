@@ -22,13 +22,15 @@ varDecl        ::= ("var" | "v") IDENTIFIER ( "=" expression )? ";" ;
 
 ## Statements
 ```
-statement      ::= exprStmt
+statement      ::= emptyStmt
+               | exprStmt
                | forStmt
                | ifStmt
                | returnStmt
                | whileStmt
                | block ;
 
+emptyStmt      ::= ";" ;
 exprStmt       ::= expression ";" ;
 forStmt        ::= "for" "(" ( varDecl | exprStmt | ";" )
                            expression? ";"

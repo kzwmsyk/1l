@@ -7,7 +7,8 @@ from oneliner.expr import AssignExpr, BinaryExpr, Expr, FunctionExpr, \
     UnaryExpr, GetExpr, ThisExpr, SuperExpr, ListExpr, MapExpr, \
     IndexGetExpr, IndexSetExpr
 from oneliner.stmt import BlockStmt, IfStmt, Stmt, VarStmt, \
-    FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt
+    FunctionStmt, ExpressionStmt, ReturnStmt, WhileStmt, ClassStmt, \
+    EmptyStmt
 from enum import Enum, auto
 
 
@@ -51,6 +52,9 @@ class Resolver():
     def resolve_statements(self, stmts: list[Stmt]):
         for stmt in stmts:
             self.resolve(stmt)
+
+    def visit_empty_stmt(self, stmt: EmptyStmt) -> None:
+        pass
 
     def visit_block_stmt(self, stmt: BlockStmt) -> None:
         self.begin_scope()

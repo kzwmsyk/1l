@@ -4,7 +4,7 @@ from oneliner.expr import Expr, LiteralExpr, GroupingExpr, SetExpr, \
     BinaryExpr, SuperExpr, TernaryExpr, VariableExpr, AssignExpr, \
     LogicalExpr, CallExpr, GetExpr, ThisExpr, UnaryExpr, FunctionExpr, \
     ListExpr, MapExpr, IndexGetExpr, IndexSetExpr
-from oneliner.stmt import Stmt, ExpressionStmt, VarStmt, \
+from oneliner.stmt import Stmt, EmptyStmt, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt
 from oneliner.error import InterpretError, ErrorReporter, Return
 from oneliner.environment import Environment
@@ -57,6 +57,9 @@ class Interpreter:  # implements ExprVisitor, StmtVisitor
 
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
         self.evaluate(stmt.expression)
+
+    def visit_empty_stmt(self, stmt: EmptyStmt) -> None:
+        pass
 
     def visit_function_stmt(self, stmt: FunctionStmt) -> None:
         function = Function(stmt=stmt,

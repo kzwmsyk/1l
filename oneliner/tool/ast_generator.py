@@ -61,6 +61,7 @@ def main(args):
                """,
                {
                    "Block": [("statements", "list[Stmt]")],
+                   "Empty": [("semicolon", "Token")],
                    "Expression": [("expression", "Expr")],
                    "Function": [("name", "Token"),
                                 ("function", "FunctionExpr")],

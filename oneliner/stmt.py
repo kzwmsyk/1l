@@ -22,6 +22,16 @@ class BlockStmt(Stmt):
         return visitor.visit_block_stmt(self)
 
 
+class EmptyStmt(Stmt):
+    def __init__(self,
+                 semicolon: Token):
+
+        self.semicolon = semicolon
+
+    def accept(self, visitor):
+        return visitor.visit_empty_stmt(self)
+
+
 class ExpressionStmt(Stmt):
     def __init__(self,
                  expression: Expr):
