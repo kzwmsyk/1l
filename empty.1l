@@ -6,6 +6,9 @@ while (10 > (i = i + 1)) ;
 
 i.print();
 
-var a;
-for (var a = 1; a < 10; a = a + 1) ;
-a.print();
+var a; # this a is global scope
+for (var a = 1 #{this a is for statement scope.} ; a < 10; a = a + 1) ;
+a.print(); # nil
+
+for (a = 1 #{this a is for statement scope.} ; a < 10; a = a + 1) ;
+a.print(); # 10
