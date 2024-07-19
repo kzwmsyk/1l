@@ -264,8 +264,8 @@ class Interpreter(ExprVisitor, StmtVisitor):
         if len(arguments) != callee.arity():
             raise InterpretError(
                 expr.paren,
-                f"Expected {callee.arity()} arguments but got {
-                    len(arguments)}."
+                f"Expected {callee.arity()} "
+                f"arguments but got {len(arguments)}."
             )
         return callee.call(self, arguments)
 
