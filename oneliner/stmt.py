@@ -2,6 +2,7 @@ from oneliner.token import Token
 from oneliner.expr import Expr, VariableExpr, FunctionExpr
 from abc import ABC, abstractmethod
 
+
 class Stmt:
     def accept(self, visitor):
         pass
@@ -16,6 +17,7 @@ class BlockStmt(Stmt):
     def accept(self, visitor):
         return visitor.visit_block_stmt(self)
 
+
 class EmptyStmt(Stmt):
     def __init__(self,
                  semicolon: Token):
@@ -25,6 +27,7 @@ class EmptyStmt(Stmt):
     def accept(self, visitor):
         return visitor.visit_empty_stmt(self)
 
+
 class ExpressionStmt(Stmt):
     def __init__(self,
                  expression: Expr):
@@ -33,6 +36,7 @@ class ExpressionStmt(Stmt):
 
     def accept(self, visitor):
         return visitor.visit_expression_stmt(self)
+
 
 class FunctionStmt(Stmt):
     def __init__(self,
@@ -44,6 +48,7 @@ class FunctionStmt(Stmt):
 
     def accept(self, visitor):
         return visitor.visit_function_stmt(self)
+
 
 class ClassStmt(Stmt):
     def __init__(self,
@@ -58,6 +63,7 @@ class ClassStmt(Stmt):
     def accept(self, visitor):
         return visitor.visit_class_stmt(self)
 
+
 class IfStmt(Stmt):
     def __init__(self,
                  condition: Expr,
@@ -71,6 +77,7 @@ class IfStmt(Stmt):
     def accept(self, visitor):
         return visitor.visit_if_stmt(self)
 
+
 class ReturnStmt(Stmt):
     def __init__(self,
                  keyword: Token,
@@ -82,6 +89,7 @@ class ReturnStmt(Stmt):
     def accept(self, visitor):
         return visitor.visit_return_stmt(self)
 
+
 class VarStmt(Stmt):
     def __init__(self,
                  name: Token,
@@ -92,6 +100,7 @@ class VarStmt(Stmt):
 
     def accept(self, visitor):
         return visitor.visit_var_stmt(self)
+
 
 class WhileStmt(Stmt):
     def __init__(self,
@@ -142,5 +151,3 @@ class StmtVisitor(ABC):
     @abstractmethod
     def visit_while_stmt(self, stmt: WhileStmt):
         pass
-
-

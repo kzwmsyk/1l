@@ -1,36 +1,57 @@
 from oneliner.expr import Expr, ExprVisitor, LiteralExpr, UnaryExpr, \
     BinaryExpr, GroupingExpr, TernaryExpr, AssignExpr, CallExpr, GetExpr, \
     SetExpr, LogicalExpr, ThisExpr, SuperExpr, ListExpr, MapExpr, \
-    IndexGetExpr, IndexSetExpr, FunctionExpr, VariableExpr, \
-    LiteralExpr, UnaryExpr
+    IndexGetExpr, IndexSetExpr, FunctionExpr, VariableExpr
 from oneliner.stmt import Stmt, StmtVisitor, ExpressionStmt, VarStmt, \
     BlockStmt, IfStmt, WhileStmt, FunctionStmt, ReturnStmt, ClassStmt, \
     EmptyStmt
+from oneliner.token import Token
+from oneliner.utll import stringify
 
 
 class AstPrinter(ExprVisitor, StmtVisitor):
 
-    def print(self, program):
-        if isinstance(program, list):
-            for statement in program:
-                self.print(statement)
+    def print(self, program: list | Stmt | Expr):
+        return print(self.stringify(program))
+
+    def stringify(self, object):
+        if isinstance(object, list):
+            return "\n".join([
+                self.stringify(statement) for statement in object
+            ])
+        elif isinstance(object, Expr | Stmt):
+            return object.accept(self)
+        elif isinstance(object, Token):
+            return object.lexeme
+        elif isinstance(object, tuple):
+            return "(" + \
+                ":".join([self.stringify(arg) for arg in object]) +\
+                ")"
         else:
-            print(program.accept(self))
+            return stringify(object, for_debug=True)
+
+    def parenthesize(self, name: str, *args: list):
+        text = f"({name}"
+        if args:
+            text += " " + " ".join([self.stringify(arg) for arg in args])
+        return text + ")"
 
     def visit_expression_stmt(self, stmt: ExpressionStmt):
         return self.parenthesize(";", stmt.expression)
 
     def visit_binary_expr(self, expr: BinaryExpr):
-        return self.parenthesize("binary", expr.left, expr.right)
+        return self.parenthesize(f"binary{expr.operator.lexeme}",
+                                 expr.left, expr.right)
 
     def visit_grouping_expr(self, expr: GroupingExpr):
         return self.parenthesize("group", expr.expression)
 
     def visit_literal_expr(self, expr: LiteralExpr):
-        return "nil" if expr.value is None else str(expr.value)
+        return self.parenthesize("literal", expr.value)
 
     def visit_unary_expr(self, expr: UnaryExpr):
-        return self.parenthesize(expr.operator.lexeme, expr.right)
+        return self.parenthesize(f"unary{expr.operator.lexeme}",
+                                 expr.operand)
 
     def visit_ternary_expr(self, expr: TernaryExpr):
         return self.parenthesize("ternary",
@@ -39,70 +60,91 @@ class AstPrinter(ExprVisitor, StmtVisitor):
                                  expr.else_expr)
 
     def visit_var_stmt(self, stmt: VarStmt):
-        return ""
+        return self.parenthesize("var-decr",
+                                 stmt.name,
+                                 stmt.initializer)
 
     def visit_block_stmt(self, stmt: BlockStmt):
-        return ""
+        return self.parenthesize("block", stmt.statements)
 
     def visit_if_stmt(self, stmt: IfStmt):
-        return ""
+        return self.parenthesize("if",
+                                 stmt.condition,
+                                 stmt.then_branch,
+                                 stmt.else_branch)
 
     def visit_while_stmt(self, stmt: WhileStmt):
-        return ""
+
+        return self.parenthesize("while",
+                                 stmt.condition,
+                                 stmt.body)
 
     def visit_function_stmt(self, stmt: FunctionStmt):
-        return ""
+        return self.parenthesize("function-decr",
+                                 stmt.name,
+                                 stmt.function)
 
     def visit_return_stmt(self, stmt: ReturnStmt):
-        return ""
+        return self.parenthesize("return", stmt.value)
 
     def visit_class_stmt(self, stmt: ClassStmt):
-        return ""
+        return self.parenthesize("class",
+                                 stmt.name,
+                                 stmt.superclass,
+                                 stmt.methods)
 
     def visit_empty_stmt(self, stmt: EmptyStmt):
-        return ""
+        return self.parenthesize("empty")
 
     def visit_function_expr(self, expr: FunctionExpr):
-        return ""
+        return self.parenthesize("function-body",
+                                 expr.params,
+                                 expr.body)
 
     def visit_variable_expr(self, expr: VariableExpr):
-        return ""
+        return self.parenthesize("variable", expr.name)
 
     def visit_assign_expr(self, expr: AssignExpr):
-        return ""
+        return self.parenthesize("=", expr.name, expr.value)
 
     def visit_call_expr(self, expr: CallExpr):
-        return ""
+        return self.parenthesize("call",
+                                 expr.callee,
+                                 expr.arguments)
 
     def visit_get_expr(self, expr: GetExpr):
-        return ""
+        return self.parenthesize(".", expr.object, expr.name)
 
     def visit_set_expr(self, expr: SetExpr):
-        return ""
+        return self.parenthesize(".=",
+                                 expr.object,
+                                 expr.name,
+                                 expr.value)
 
     def visit_logical_expr(self, expr: LogicalExpr):
-        return ""
+        return self.parenthesize(f"logical{expr.operator.lexeme}",
+                                 expr.left,
+                                 expr.right)
 
     def visit_this_expr(self, expr: ThisExpr):
-        return ""
+        return self.parenthesize("this")
 
     def visit_super_expr(self, expr: SuperExpr):
-        return ""
+        return self.parenthesize("super", expr.method)
 
     def visit_list_expr(self, expr: ListExpr):
-        return ""
+        return self.parenthesize("list", expr.elements)
 
     def visit_map_expr(self, expr: MapExpr):
-        return ""
+        return self.parenthesize("map", expr.elements)
 
     def visit_index_get_expr(self, expr: IndexGetExpr):
-        return ""
+        return self.parenthesize("[]",
+                                 expr.object,
+                                 expr.index)
 
     def visit_index_set_expr(self, expr: IndexSetExpr):
-        return ""
-
-    def parenthesize(self, name, *args: list[Expr]):
-        text = f"({name}"
-        if args:
-            text += " " + " ".join([arg.accept(self) for arg in args])
-        return text + ")"
+        return self.parenthesize("[]=",
+                                 expr.object,
+                                 expr.index,
+                                 expr.value)

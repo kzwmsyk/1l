@@ -1,6 +1,7 @@
 {{imports}}
 from abc import ABC, abstractmethod
 
+
 class {{base_name}}:
     def accept(self, visitor):
         pass
@@ -18,8 +19,8 @@ class {{subclass_name}}{{base_name}}({{base_name}}):
     def accept(self, visitor):
         return visitor.visit_{{subclass_name_lc}}_{{base_name_lc}}(self)
 
-{{/types}}
 
+{{/types}}
 class {{base_name}}Visitor(ABC):
 
     {{#types}}

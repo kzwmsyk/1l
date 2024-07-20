@@ -479,6 +479,6 @@ class Parser:
             match self.peek().type:
                 case TokenType.CLASS | TokenType.FUN | TokenType.VAR |\
                         TokenType.FOR | TokenType.IF | TokenType.WHILE |\
-                        TokenType.PRINT | TokenType.RETURN:
+                        TokenType.RETURN:
                     return
             self.advance()

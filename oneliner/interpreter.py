@@ -261,11 +261,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
             raise InterpretError(
                 expr.paren, "Can only callable functions and classes.")
 
-        if len(arguments) != callee.arity():
+        if (actual := len(arguments)) != (expected := callee.arity()):
             raise InterpretError(
                 expr.paren,
-                f"Expected {callee.arity()} "
-                f"arguments but got {len(arguments)}."
+                f"Expected {expected} arguments but got {actual}."
             )
         return callee.call(self, arguments)
 
